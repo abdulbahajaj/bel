@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+  "fmt"
 )
 
 func main() {
-	fmt.Println("Bel")
+  fmt.Printf("Bel %+v\n", GoTokens)
 }
