@@ -10,4 +10,4 @@ run:
 
 .PHONY: test
 test:
-	go test pkg/tokenizer/tokenizer_test.go
+	go test pkg/reader/tokenizer_test.go

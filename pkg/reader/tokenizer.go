@@ -2,8 +2,9 @@
 package reader
 
 import (
-    "fmt"
-    "strings"
+  "io"
+  "bytes"
+  "bufio"
 )
 
 type TokenType int
@@ -16,73 +17,145 @@ const (
   CLOSE_PARENTHESE
 
   SYMBOL
+  PLUS
+  MINUS
   NUMBER
 )
 
+var eof = rune(0)
+
+type Token struct {
+  Type TokenType
+  Lit string
+}
+
 type Scanner struct {
-  src io.Reader
+  src *bufio.Reader
 }
 
-type Token struct{
-    val string
-    name string
-    line int
-    start int
-    end int
-    valid bool
-    ignore bool
+func NewScanner(r io.Reader) *Scanner {
+  return &Scanner{src: bufio.NewReader(r)}
 }
 
-type tokenPattern struct{
-    name string
-    pattern string
-    ignore bool
-    valid bool
+func (s *Scanner) read() rune {
+  ch, _, err := s.src.ReadRune()
+  if err != nil {
+    return eof
+  }
+  return ch
+}
+// Used for look ahead
+func (s *Scanner) unread() error { return s.src.UnreadRune() }
+func isWhitespace(ch rune) bool {
+  return ch == ' ' || ch == '\t' || ch == '\n'
+}
+func isLetter(ch rune) bool {
+  return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+}
+func isDigit(ch rune) bool {
+  return (ch >= '0' && ch <= '9')
 }
 
+func (s *Scanner) scanWhitespace() (tok TokenType, lit string) {
+  var buf bytes.Buffer
+  buf.WriteRune(s.read())
 
-func getTokenNames()map[string]string{
-    namesList := []string{
-        "newLine",
-        "comment",
-        "openRoundBracket",
-        "closeRoundBracket",
-        "symbol"
+  for {
+    if ch := s.read(); ch == eof {
+      break
+    } else if !isWhitespace(ch) {
+      s.unread()
+      break
+    } else {
+      buf.WriteRune(ch)
     }
-    var namesMap map[string]string
+  }
 
-    for name := range namesList{
-        namesMap[name] = name
+  return WS, buf.String()
+}
+
+func (s *Scanner) scanNumber() (tok TokenType, lit string) {
+  var buf bytes.Buffer
+  buf.WriteRune(s.read())
+
+  for {
+    if ch := s.read(); ch == eof {
+      break
+    } else if !isDigit(ch) && ch != '.' {
+      s.unread()
+      break
+    } else {
+      buf.WriteRune(ch)
     }
+  }
 
-    return namesMap
+  // Otherwise return as a regular identifier.
+  return NUMBER, buf.String()
 }
 
-func genTokenPatterns()[]Token{
-    names := genTokenNames()
-    return []Token{
-        Token{name: names["newLine"], pattern: ""},
+func (s *Scanner) scanSymbol() (tok TokenType, lit string) {
+  var buf bytes.Buffer
+  buf.WriteRune(s.read())
+
+  for {
+    if ch := s.read(); ch == eof {
+      break
+    } else if !isLetter(ch) && !isDigit(ch) {
+      s.unread()
+      break
+    } else {
+      buf.WriteRune(ch)
     }
+  }
+
+  return SYMBOL, buf.String()
 }
 
-func matchToken(in string) Token, bool{
+func (s *Scanner) Scan() (tok TokenType, lit string) {
+  ch := s.read()
 
+  // Multiple line token
+  if isWhitespace(ch) {
+    s.unread()
+    return s.scanWhitespace()
+  } else if isDigit(ch) || ch == '.' { // .0 would be considered 0.0
+    s.unread()
+    return s.scanNumber()
+  } else if isLetter(ch) {
+    s.unread()
+    return s.scanSymbol()
+  }
+
+  // individual character token
+  switch ch {
+  case eof:
+    return EOF, ""
+  case '+':
+    return PLUS, string(ch)
+  case '-':
+    return MINUS, string(ch)
+  case '(':
+    return OPEN_PARENTHESE, string(ch)
+  case ')':
+    return CLOSE_PARENTHESE, string(ch)
+  }
+
+  return ILLEGAL, string(ch)
 }
 
-func tokenize(in string){
-    // TODO Set a more efficient default size/capacity
-    allTokens := make([]Token, 1)
+func PraseTokens(r io.Reader) []Token {
+  s := NewScanner(r)
 
-    lineNum = 0
-    more := true
+  tokens := []Token{}
+  for {
+    tok, lit := s.Scan()
+    tokens = append(tokens, Token{tok, lit})
 
-    names := getTokenNames()
-
-    for more{
-        var token Token
-        token, more = matchToken(in)
-        if token.name == names['newLine']{
-            lineNum++
-        }
+    if tok == EOF {
+      break
     }
+  }
+  
+  return tokens
 }
+

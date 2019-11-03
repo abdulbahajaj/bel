@@ -1,5 +1,5 @@
 package reader
 
 func Test(){
-	tokenize("test2")
+	// tokenize("test2")
 }
