@@ -11,10 +11,10 @@ language. Bel is a dialect of lisp developed by Paul Graham with the intent of
 making lisp even easier to write. See the references section for more information.
 
 ### Ease of mastery
-A good language is easy to learn and master. Afterall, how good is a language that requires a decade of your 
-life to become somewhat good at it to become somewhat decent ? Bel is designed to be really easy to learn. 
-We do that by minimizing its features and add those features that are absolutely necessary.
-You should be able to become an expert in Bel in less than a year.
+A good language is easy to master. Afterall, how good is a language that requires a decade of your 
+life to become somewhat good at? Bel is designed to be really easy to learn. We achieve that by only adding the features 
+that are absolutely necessary.
+You will be able to become a Bel expert in less than a year.
 
 ### Concurrency and distributed computing
 
