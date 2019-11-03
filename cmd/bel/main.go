@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-  fmt.Printf("Bel %+v\n", GoTokens)
+  fmt.Printf("Bel %+v\n")
 }
