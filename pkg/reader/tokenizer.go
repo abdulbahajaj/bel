@@ -6,6 +6,23 @@ import (
     "strings"
 )
 
+type TokenType int
+const (
+  ILLEGAL TokenType = iota
+  EOF
+  WS
+
+  OPEN_PARENTHESE
+  CLOSE_PARENTHESE
+
+  SYMBOL
+  NUMBER
+)
+
+type Scanner struct {
+  src io.Reader
+}
+
 type Token struct{
     val string
     name string
@@ -22,6 +39,7 @@ type tokenPattern struct{
     ignore bool
     valid bool
 }
+
 
 func getTokenNames()map[string]string{
     namesList := []string{
