@@ -58,9 +58,13 @@ func tokenize(in string){
     lineNum = 0
     more := true
 
+    names := getTokenNames()
+
     for more{
         var token Token
         token, more = matchToken(in)
-
+        if token.name == names['newLine']{
+            lineNum++
+        }
     }
 }
