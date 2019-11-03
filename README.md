@@ -26,6 +26,7 @@ You will be able to become a Bel expert in less than a year.
 
 ### Testing and support
 
+## Contribution policy
 
 ## References
 
