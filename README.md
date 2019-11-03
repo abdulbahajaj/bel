@@ -12,7 +12,7 @@ making lisp even easier to write. See the references section for more informatio
 
 ### Ease of mastery
 A good language is easy to master. Afterall, how good is a language that requires a decade of your 
-life to become somewhat good at? Bel is designed to be really easy to learn. We achieve that by only adding the features 
+life to become somewhat good at? Bel is designed to be really easy to learn. We achieve that by adding the features 
 that are absolutely necessary.
 You will be able to become a Bel expert in less than a year.
 
