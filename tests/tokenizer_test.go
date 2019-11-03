@@ -9,7 +9,5 @@ import (
 )
 
 func TestTesting(t *testing.T) {
-  if !tokenizer.Testing() {
-    t.Errorf("Testing failed")
-  }
+  assert.True(t, tokenizer.Testing())
 }
