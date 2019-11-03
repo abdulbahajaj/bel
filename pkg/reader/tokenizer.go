@@ -3,68 +3,99 @@ package reader
 
 import (
     "fmt"
-    "strings"
+    // "strings"
+    "regexp"
+)
+
+type TokenName int
+const (
+    NEWLINE TokenName=iota
+    COMMENT
+    OPEN_CIRCLE_BRACKET
+    CLOSE_CIRCLE_BRACKET
+    INVALID
+
 )
 
 type Token struct{
+    name TokenName
     val string
-    name string
     line int
     start int
     end int
-    valid bool
-    ignore bool
 }
 
 type tokenPattern struct{
-    name string
+    name TokenName
     pattern string
-    ignore bool
-    valid bool
+    compiledPattern *regexp.Regexp
 }
 
-func getTokenNames()map[string]string{
-    namesList := []string{
-        "newLine",
-        "comment",
-        "openRoundBracket",
-        "closeRoundBracket",
-        "symbol"
+func compilePatterns(allPatterns []tokenPattern) []tokenPattern{
+    compiledPatterns := make([]tokenPattern, 0, len(allPatterns))
+    for _, pattern := range allPatterns{
+        pattern.pattern = "^" + pattern.pattern
+        pattern.compiledPattern, _= regexp.Compile(pattern.pattern)
+        compiledPatterns = append(compiledPatterns, pattern)
     }
-    var namesMap map[string]string
-
-    for name := range namesList{
-        namesMap[name] = name
-    }
-
-    return namesMap
+    return compiledPatterns
 }
 
-func genTokenPatterns()[]Token{
-    names := genTokenNames()
-    return []Token{
-        Token{name: names["newLine"], pattern: ""},
+func matchToken(in string, allPatterns []tokenPattern) (Token, string){
+
+    for _, pattern := range allPatterns {
+        match := pattern.compiledPattern.FindString(in)
+        if match != "" {
+            newIn := in[len(match):]
+            return Token{name: pattern.name, val: match}, newIn
+        }
     }
+    var t Token
+    var s string
+    return t, s
 }
 
-func matchToken(in string) Token, bool{
+func printToken(token Token){
+    if token.name == NEWLINE{
+        fmt.Print("NEWLINE: ")
+    }
+    if token.name == COMMENT{
+        fmt.Print("COMMENT: ")
+    }
+    if token.name == OPEN_CIRCLE_BRACKET{
+        fmt.Print("OPEN_CIRCLE_BRACKET: ")
+    }
+    if token.name == CLOSE_CIRCLE_BRACKET{
+        fmt.Print("CLOSE_CIRCLE_BRACKET: ")
+    }
+    if token.name == INVALID{
+        fmt.Print("INVALID: ")
+    }
+    fmt.Println(token.val)
+}
 
+func printAllTokens(allTokens []Token){
+    for _, token := range allTokens {
+        printToken(token)
+    }
 }
 
 func tokenize(in string){
-    // TODO Set a more efficient default size/capacity
-    allTokens := make([]Token, 1)
-
-    lineNum = 0
-    more := true
-
-    names := getTokenNames()
-
-    for more{
-        var token Token
-        token, more = matchToken(in)
-        if token.name == names['newLine']{
-            lineNum++
-        }
+    allPatterns := []tokenPattern{
+        tokenPattern{ name: OPEN_CIRCLE_BRACKET,   pattern: `\(` },
+        tokenPattern{ name: CLOSE_CIRCLE_BRACKET,  pattern: `\)` },
+        tokenPattern{ name: COMMENT,  pattern: `;.*`  },
+        tokenPattern{ name: INVALID,  pattern: `.` },
     }
+    allPatterns = compilePatterns(allPatterns)
+
+    allTokens := make([]Token,0,1)
+
+    for in != ""{
+        token, newIn := matchToken(in, allPatterns)
+        in = newIn
+        allTokens = append(allTokens, token)
+    }
+
+    printAllTokens(allTokens)
 }
