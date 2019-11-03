@@ -3,13 +3,12 @@ package reader
 
 import (
     "fmt"
-    // "strings"
     "regexp"
 )
 
-type TokenName int
+type tokenName int
 const (
-    NEWLINE TokenName=iota
+    NEWLINE tokenName=iota
     COMMENT
     OPEN_CIRCLE_BRACKET
     CLOSE_CIRCLE_BRACKET
@@ -17,8 +16,8 @@ const (
 
 )
 
-type Token struct{
-    name TokenName
+type token struct{
+    name tokenName
     val string
     line int
     start int
@@ -26,7 +25,7 @@ type Token struct{
 }
 
 type tokenPattern struct{
-    name TokenName
+    name tokenName
     pattern string
     compiledPattern *regexp.Regexp
 }
@@ -41,21 +40,21 @@ func compilePatterns(allPatterns []tokenPattern) []tokenPattern{
     return compiledPatterns
 }
 
-func matchToken(in string, allPatterns []tokenPattern) (Token, string){
+func matchToken(in string, allPatterns []tokenPattern) (token, string){
 
     for _, pattern := range allPatterns {
         match := pattern.compiledPattern.FindString(in)
         if match != "" {
             newIn := in[len(match):]
-            return Token{name: pattern.name, val: match}, newIn
+            return token{name: pattern.name, val: match}, newIn
         }
     }
-    var t Token
+    var t token
     var s string
     return t, s
 }
 
-func printToken(token Token){
+func printToken(token token){
     if token.name == NEWLINE{
         fmt.Print("NEWLINE: ")
     }
@@ -74,13 +73,13 @@ func printToken(token Token){
     fmt.Println(token.val)
 }
 
-func printAllTokens(allTokens []Token){
+func printAllTokens(allTokens []token){
     for _, token := range allTokens {
         printToken(token)
     }
 }
 
-func tokenize(in string){
+func tokenize(in string) []token{
     allPatterns := []tokenPattern{
         tokenPattern{ name: OPEN_CIRCLE_BRACKET,   pattern: `\(` },
         tokenPattern{ name: CLOSE_CIRCLE_BRACKET,  pattern: `\)` },
@@ -89,7 +88,7 @@ func tokenize(in string){
     }
     allPatterns = compilePatterns(allPatterns)
 
-    allTokens := make([]Token,0,1)
+    allTokens := make([]token,0,1)
 
     for in != ""{
         token, newIn := matchToken(in, allPatterns)
@@ -98,4 +97,5 @@ func tokenize(in string){
     }
 
     printAllTokens(allTokens)
+    return allTokens
 }
