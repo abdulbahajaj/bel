@@ -5,7 +5,7 @@ import (
 
   "github.com/stretchr/testify/assert"
 
-  "github.com/abdulbahajaj/bel/pkg/tokenizer"
+  "github.com/abdulbahajaj/brutus/pkg/tokenizer"
 )
 
 func TestTesting(t *testing.T) {

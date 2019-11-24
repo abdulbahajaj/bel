@@ -4,16 +4,25 @@ package reader
 import (
     "fmt"
     "regexp"
+    "errors"
 )
 
 type tokenName int
 const (
+    //Compiler specific token-types
     NEWLINE tokenName=iota
     COMMENT
+    INVALID
+    WHITE_SPACE
+
+    //Bel specific token-types
     OPEN_CIRCLE_BRACKET
     CLOSE_CIRCLE_BRACKET
-    INVALID
-
+    NUMBER
+    CHARACHTER
+    STRING
+    WORD // Anything other than the above, could be symbol,
+         // special form, etc
 )
 
 type token struct{
@@ -22,6 +31,36 @@ type token struct{
     line int
     start int
     end int
+}
+
+func (token token) String() string {
+
+    var tokenName string
+
+    if token.name == NEWLINE{
+        tokenName = "NEWLINE"
+    } else if token.name == COMMENT{
+        tokenName = "COMMENT"
+    } else if token.name == OPEN_CIRCLE_BRACKET{
+        tokenName = "OPEN_CIRCLE_BRACKET"
+    } else if token.name == CLOSE_CIRCLE_BRACKET{
+        tokenName = "CLOSE_CIRCLE_BRACKET"
+    } else if token.name == INVALID{
+        tokenName = "INVALID"
+    } else if token.name == WHITE_SPACE{
+        tokenName = "WHITE_SPACE"
+    } else if token.name == NUMBER{
+        tokenName = "NUMBER"
+    } else if token.name == CHARACHTER{
+        tokenName = "CHARACHTER"
+    } else if token.name == STRING{
+        tokenName = "STRING"
+    } else if token.name == WORD{
+        tokenName = "WORD"
+    }
+
+    return fmt.Sprintf("type: %v, val: %v, line: %v, start: %v, end: %v",
+        tokenName, token.val, token.line, token.start, token.end)
 }
 
 type tokenPattern struct{
@@ -54,38 +93,42 @@ func matchToken(in string, allPatterns []tokenPattern) (token, string){
     return t, s
 }
 
-func printToken(token token){
-    if token.name == NEWLINE{
-        fmt.Print("NEWLINE: ")
-    }
-    if token.name == COMMENT{
-        fmt.Print("COMMENT: ")
-    }
-    if token.name == OPEN_CIRCLE_BRACKET{
-        fmt.Print("OPEN_CIRCLE_BRACKET: ")
-    }
-    if token.name == CLOSE_CIRCLE_BRACKET{
-        fmt.Print("CLOSE_CIRCLE_BRACKET: ")
-    }
-    if token.name == INVALID{
-        fmt.Print("INVALID: ")
-    }
-    fmt.Println(token.val)
-}
 
 func printAllTokens(allTokens []token){
     for _, token := range allTokens {
-        printToken(token)
+        fmt.Println(token)
     }
+}
+
+func cleanTokens(allTokens []token) ([]token, error){
+    cleanedTokens := make([]token, 0,len(allTokens))
+
+    for _, token := range allTokens {
+        if token.name == NEWLINE{
+            continue
+        } else if token.name == COMMENT{
+            continue
+        } else if token.name == INVALID{
+            return cleanedTokens, errors.New(fmt.Sprintf("Invalid token <%s>", token.String()))
+        }
+        cleanedTokens = append(cleanedTokens, token)
+    }
+    return cleanedTokens, nil
 }
 
 func tokenize(in string) []token{
     allPatterns := []tokenPattern{
+        tokenPattern{ name: COMMENT,  pattern: `;`  },
+        tokenPattern{ name: STRING,  pattern: `\".*?\"`},
+        tokenPattern{ name: WHITE_SPACE,  pattern: ` `  },
+        tokenPattern{ name: CHARACHTER ,  pattern: `\\(bel|[a-z])`},
+        tokenPattern{ name: NUMBER,  pattern: `[+-]?([0-9]+(\.[0-9]*)?)`},
         tokenPattern{ name: OPEN_CIRCLE_BRACKET,   pattern: `\(` },
         tokenPattern{ name: CLOSE_CIRCLE_BRACKET,  pattern: `\)` },
-        tokenPattern{ name: COMMENT,  pattern: `;.*`  },
+        tokenPattern{ name: WORD,  pattern: `[^ ]+` },
         tokenPattern{ name: INVALID,  pattern: `.` },
     }
+
     allPatterns = compilePatterns(allPatterns)
 
     allTokens := make([]token,0,1)
@@ -96,6 +139,11 @@ func tokenize(in string) []token{
         allTokens = append(allTokens, token)
     }
 
-    printAllTokens(allTokens)
-    return allTokens
+    cleanedTokens, err := cleanTokens(allTokens)
+
+    if err != nil {
+        panic(err)
+    }
+
+    return cleanedTokens
 }
