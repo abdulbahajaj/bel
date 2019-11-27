@@ -40,17 +40,12 @@ func (bList BrutList) Append(el BrutType) BrutList{
 	for _, el := range bList.Elements {
 		exist += el.String() + " "
 	}
-	fmt.Println("--exists before: " + exist)
 	bList.Elements = append(bList.Elements, el)
 
-	fmt.Println("Adding an element: " + el.String())
 	exist = ""
 	for _, el := range bList.Elements {
 		exist += el.String() + " "
 	}
-
-
-	fmt.Println("--exists: " + exist)
 
 	return bList
 }

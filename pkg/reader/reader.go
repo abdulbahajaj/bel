@@ -154,10 +154,8 @@ func readExp(allTokens []token)(types.BrutList, []token, error){
 			}
 			allTokens = remaining_tokens
 			exp = exp.Append(result)
-			fmt.Println("Appended thing")
 		}
 	}
-	fmt.Println("returning the true exp")
 	return exp, allTokens, nil
 }
 
@@ -194,7 +192,6 @@ func Read(allTokens []token)(types.BrutType, []token, error){
 func ReadModule(in string) (types.BrutModule, error){
 	module := types.NewBrutModule()
 	allTokens := tokenize(in)
-	// printAllTokens(allTokens)
 	for {
 		exp, remaining_tokens, err := Read(allTokens)
 
