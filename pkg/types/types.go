@@ -17,6 +17,8 @@ const (
 	MODULE
 )
 
+type BrutAny interface {}
+
 type BrutType interface {
 	GetType() ObjectType
 	String() string
@@ -116,11 +118,11 @@ func (bModule BrutModule) String() string{
 */
 
 type BrutNumber struct {
-	value float64
+	Value float64
 }
 
 func NewBrutNumber(num float64) BrutNumber{
-	return BrutNumber{value:num}
+	return BrutNumber{Value:num}
 }
 
 func (BrutNumber) GetType() ObjectType{
@@ -128,11 +130,11 @@ func (BrutNumber) GetType() ObjectType{
 }
 
 func (bNumber BrutNumber) String() string{
-	return fmt.Sprintf("%v", bNumber.value)
+	return fmt.Sprintf("%v", bNumber.Value)
 }
 
 /*
-* symbols
+* Symbols
 */
 
 type BrutSymbol struct {
@@ -150,3 +152,44 @@ func (BrutSymbol) GetType() ObjectType{
 func (bSym BrutSymbol) String() string{
 	return bSym.sym
 }
+
+
+/*
+* lambda
+*/
+
+type BrutLambdaBody struct{
+	params []BrutSymbol
+	body BrutList
+}
+
+type BrutLambda struct{
+	param BrutList
+	body []BrutLambdaBody
+}
+
+
+/*
+* Environment
+*/
+
+type Env struct{
+	value map[string]BrutType
+}
+
+func NewEnv() Env{
+	return Env{value: make(map[string]BrutType)}
+}
+
+func (e Env) LookUp(sym BrutSymbol)BrutType{
+	return e.value[sym.String()]
+}
+
+// func (e Env) Set(sym types.BrutSymbol, val types.BrutType) Env{
+// 	e.value[sym.String()] = val
+// 	return e
+// }
+
+// func (e Env) setPrimitives() Env{
+// 	return e
+// }

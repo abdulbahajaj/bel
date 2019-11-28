@@ -92,6 +92,7 @@ func tokenize(in string) []token{
 /*
 * Reader
 */
+
 func consume(in []token) (token, []token, error){
 	if len(in) == 0 {
 		return token{}, []token{}, errors.New("Empty token list")
