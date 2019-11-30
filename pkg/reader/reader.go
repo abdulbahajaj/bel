@@ -71,6 +71,7 @@ func tokenize(in string) []token{
 		tokenPattern{ name: "OPEN_CIRCLE_BRACKET",   pattern: `\(` },
 		tokenPattern{ name: "CLOSE_CIRCLE_BRACKET",  pattern: `\)` },
 		tokenPattern{ name: "ESCAPED",  pattern: `(\\bel|\\.)` },
+		tokenPattern{ name: "NEW_LINE",  pattern: `\n` },
 		tokenPattern{ name: "SYMBOL",  pattern: `[^ ]*` },
 		tokenPattern{ name: "OTHER",  pattern: `.` },
 	}
@@ -147,6 +148,8 @@ func readExp(allTokens []token)(types.BrutList, []token, error){
 			return exp, remaining_tokens, nil
 		} else if current.name == "WHITE_SPACE" {
 			continue
+		} else if current.name == "NEW_LINE"{
+			continue
 		} else {
 			allTokens = unConsume(current, allTokens)
 			result, remaining_tokens, err := Read(allTokens)
@@ -169,12 +172,12 @@ func readNum(allTokens []token) (types.BrutNumber, []token, error){
 }
 
 func Read(allTokens []token)(types.BrutType, []token, error){
-	current_token, remaining_token, err := consume(allTokens)
+	current_token, remaining_tokens, err := consume(allTokens)
 
 	if err != nil {
 		return types.BrutList{}, []token{}, err
 	}
-	allTokens = unConsume(current_token, remaining_token)
+	allTokens = unConsume(current_token, remaining_tokens)
 
 	if current_token.name == "OPEN_CIRCLE_BRACKET" {
 		return readExp(allTokens)
@@ -184,6 +187,9 @@ func Read(allTokens []token)(types.BrutType, []token, error){
 		return readNum(allTokens)
 	} else if current_token.name == "SYMBOL" {
 		return readSymbol(allTokens)
+	} else if current_token.name == "NEW_LINE" {
+		_, remaining_tokens, _ = consume(allTokens)
+		return Read(remaining_tokens)
 	}
 
 	return types.BrutList{}, []token{}, errors.New(
@@ -193,6 +199,7 @@ func Read(allTokens []token)(types.BrutType, []token, error){
 func ReadModule(in string) (types.BrutModule, error){
 	module := types.NewBrutModule()
 	allTokens := tokenize(in)
+	printAllTokens(allTokens)
 	for {
 		exp, remaining_tokens, err := Read(allTokens)
 

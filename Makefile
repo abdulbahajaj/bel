@@ -1,10 +1,10 @@
 .PHONY: build
 build:
-	go build -o bin/brutus cmd/brutus/main.go
+	go build -o bin/brut cmd/brutus/main.go
 
 .PHONY: run
 run:
-	go run cmd/brutus/main.go
+	go run cmd/brutus/main.go tests/manual-test.brut
 
 .PHONY: test
 test:

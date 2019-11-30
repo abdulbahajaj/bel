@@ -53,10 +53,12 @@ func recEval(bType types.BrutType, env types.BrutEnv) types.BrutType{
 //Sets up the environment and calls recEval
 func Eval(bType types.BrutType) types.BrutType{
 	env := primitives.GetPrimitiveEnv()
+	return_stack := types.NewBrutList()
 	if bType.GetType() == types.MODULE {
 		for _, exp := range bType.(types.BrutModule).Expressions {
-			return recEval(exp, env)
+			return_stack = return_stack.Append(recEval(exp, env))
 		}
+		return return_stack
 	}
 	return recEval(bType, env)
 }
