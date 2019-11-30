@@ -4,6 +4,7 @@ import (
 	"github.com/abdulbahajaj/brutus/pkg/types"
 )
 
+
 /*
 * Function invocation
 */

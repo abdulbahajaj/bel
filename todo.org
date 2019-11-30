@@ -1,0 +1,35 @@
+#+TITLE: todo
+* Table of contents :TOC:
+- [[#special-forms][Special forms]]
+- [[#primitives][Primitives]]
+
+* TODO Special forms
+1. Literals
+   1. Primitive
+   2. Clojures
+   3. Macros
+2. Import
+3. Appy
+4. where
+5. Dyn
+6. After
+7. ccc
+8. thread
+
+* TODO Primitives
+1. id
+2. join
+3. car
+4. cdr
+5. type
+6. xar
+7. xdr
+8. sym
+9. nom
+10. wrb
+11. rdb
+12. ops
+13. cls
+14. stat
+15. coin
+16. sys
