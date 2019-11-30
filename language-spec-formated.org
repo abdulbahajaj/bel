@@ -1063,10 +1063,14 @@ a
 You can also use ,@ to get a value spliced into the surrounding
 list:
 
+#+BEGIN_SRC common-lisp
 > (set y '(c d))
 (c d)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > `(a b ,@y e f)
 (a b c d e f)
+#+END_SRC
 
 
 ** No
@@ -1075,10 +1079,14 @@ no that takes one argument, x, and returns the result of using id to
 compare it to nil. So no returns t if its argument is nil, and nil
 otherwise.
 
+#+BEGIN_SRC common-lisp
 > (no nil)
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (no 'a)
 nil
+#+END_SRC
 
 Since nil represents both falsity and the empty list, no is both
 logical negation and the test for the empty list.
@@ -1088,14 +1096,22 @@ logical negation and the test for the empty list.
 The second function, atom, returns true iff its argument is not a
 pair.
 
+#+BEGIN_SRC common-lisp
 > (atom \a)
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (atom nil)
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (atom 'a)
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (atom '(a))
 nil
+#+END_SRC
 
 
 ** All and some
@@ -1103,22 +1119,32 @@ Next come a pair of similar functions, all and some. The former
 returns t iff its first argument returns true of all the elements of
 its second,
 
+#+BEGIN_SRC common-lisp
 > (all atom '(a b))
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (all atom nil)
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (all atom '(a (b c) d))
 nil
+#+END_SRC
 
 and the latter returns true iff its first argument returns true of
 any element of its second. However, when some returns true, it
 doesn't simply return t. It returns the remainder of the list
 starting from the point where f was true of the first element.
 
+#+BEGIN_SRC common-lisp
 > (some atom '((a b) (c d)))
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (some atom '((a b) c (d e)))
 (c (d e))
+#+END_SRC
 
 Logically, any value except nil counts as truth, so why not return
 the most informative result you can?
@@ -1142,8 +1168,10 @@ perhaps continuing down the cdr is very common.
 Something else is new in all and some: these are the first functions
 in the Bel source that you could cause an error by calling.
 
+#+BEGIN_SRC common-lisp
 > (all atom 'a)
 Error: can't call car on a non-nil atom.
+#+END_SRC
 
 I made up that error message; Bel doesn't specify more about errors
 in primitives than when they occur, and doesn't specify anything
@@ -1151,7 +1179,9 @@ about repls. But some error will be signalled if you call all with a
 non-nil atom as the second argument, because in the second test
 within the if
 
+#+BEGIN_SRC common-lisp
 (f (car xs))
+#+END_SRC
 
 car is called on it, and it's an error to call car on anything except
 a pair or nil.
@@ -1161,8 +1191,10 @@ getting to more complex ones: these functions are not defined the
 way they would be in idiomatic Bel. For example, if all didn't
 already exist in Bel you could define it as simply
 
+#+BEGIN_SRC common-lisp
 (def all (f xs)
   (~some ~f xs))
+#+END_SRC
 
 But since we haven't defined functional composition yet, I didn't use
 it.
@@ -1172,19 +1204,25 @@ it.
 The next function, reduce, is for combining the elements of its
 second argument using nested calls to its first. For example
 
+#+BEGIN_SRC common-lisp
 (reduce f '(a b c d))
+#+END_SRC
 
 is equivalent to
 
+#+BEGIN_SRC common-lisp
 (f 'a (f 'b (f 'c 'd)))
+#+END_SRC
 
 If xs has only one element, reduce returns it, and if it's empty,
 reduce returns nil; since (cdr nil) is nil, we can check both these
 possibilities with (no (cdr xs)). Otherwise it calls f on the first
 element and reduce of f and the remaining elements.
 
+#+BEGIN_SRC common-lisp
 > (reduce join '(a b c))
 (a b . c)
+#+END_SRC
 
 This is not the only way to reduce a list. Later we'll define two
 more, foldl and foldr.
@@ -1195,22 +1233,27 @@ it helps humans read your code, but I've found three ways of
 indenting ifs that work well. If an if has more than two tests and
 the arguments are sufficiently short, it works well to say
 
+#+BEGIN_SRC common-lisp
 (if test1 then1
     test2 then2
           else)
+#+END_SRC
 
 We saw this in all and some. But if you only have one test, or some
 arguments are too long to fit two on one line, then it works better
 to say
 
+#+BEGIN_SRC common-lisp
 (if test1
     then1
     test2
     then2
     else)
+#+END_SRC
 
 or if an if is long,
 
+#+BEGIN_SRC common-lisp
 (if test1
      then1
     test2
@@ -1218,26 +1261,33 @@ or if an if is long,
     test3
      then3
      else)
+#+END_SRC
 
 
 ** Cons
 The next function, cons, has the name that join had in McCarthy's
 Lisp. It's the function you use to put things on the front of a list.
 
+#+BEGIN_SRC common-lisp
 > (cons 'a '(b c))
 (a b c)
+#+END_SRC
 
 If you only want to put one thing on the front of a list, you could
 use join.
 
+#+BEGIN_SRC common-lisp
 > (join 'a '(b c))
 (a b c)
+#+END_SRC
 
 With cons, however, you can supply more than one thing to put on the
 front:
 
+#+BEGIN_SRC common-lisp
 > (cons 'a 'b 'c '(d e f))
 (a b c d e f)
+#+END_SRC
 
 Since cons is a generalization of join, it's rare to see join in
 programs.
@@ -1247,11 +1297,15 @@ parameter, args, instead of a list of parameters. When a function has
 a single parameter, its value will be a list of all the arguments
 supplied when the function is called. So if we call cons thus
 
+#+BEGIN_SRC common-lisp
 (cons 'a 'b '(c d))
+#+END_SRC
 
 the value of args will be
 
+#+BEGIN_SRC common-lisp
 (a b (c d))
+#+END_SRC
 
 
 ** List parameter
@@ -1261,41 +1315,57 @@ the corresponding values; otherwise an error is signalled.
 
 So for example if a function f has the parameter list
 
+#+BEGIN_SRC common-lisp
 (x . y)
+#+END_SRC
 
 and it's called
 
+#+BEGIN_SRC common-lisp
 (f 'a 'b 'c)
+#+END_SRC
 
 then x will be a, and y will be (b c).
 
 If the same function is called
 
+#+BEGIN_SRC common-lisp
 (f 'a)
+#+END_SRC
 
 then x will be a, and y will be nil. And if it's called
 
+#+BEGIN_SRC common-lisp
 (f)
+#+END_SRC
 
 you'll get an error because there is no value for x.
 
 If a function f has the parameter list
 
+#+BEGIN_SRC common-lisp
 ((x y) z)
+#+END_SRC
 
 and is called
 
+#+BEGIN_SRC common-lisp
 (f '(a (b c)) '(d))
+#+END_SRC
 
 then x will be a, y will be (b c), and z will be (d). Whereas if it's
 called
 
+#+BEGIN_SRC common-lisp
 (f '(a) '(d))
+#+END_SRC
 
 you'll get an error because there is no value for y, and if it's
 called
 
+#+BEGIN_SRC common-lisp
 (f '(a b c) '(d))
+#+END_SRC
 
 you'll get an error because there is no parameter for c.
 
@@ -1303,28 +1373,38 @@ you'll get an error because there is no parameter for c.
 ** Append
 The next function, append, joins lists together:
 
+#+BEGIN_SRC common-lisp
 > (append '(a b c) '(d e f))
 (a b c d e f)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (append '(a) nil '(b c) '(d e f))
 (a b c d e f)
+#+END_SRC
 
 Its definition will be easier to understand if we look first at a
 two-argument version.
 
+#+BEGIN_SRC common-lisp
 (def append2 (xs ys)
   (if (no xs)
       ys
       (cons (car xs) (append2 (cdr xs) ys))))
+#+END_SRC
 
 In English, if xs is empty, then just return ys. Otherwise return the
 result of consing the first element of xs onto append of the rest of
 xs and ys. I.e.
 
+#+BEGIN_SRC common-lisp
 (append2 '(a b c) '(d e f))
+#+END_SRC
 
 becomes
 
+#+BEGIN_SRC common-lisp
 (cons 'a (append2 '(b c) '(d e f)))
+#+END_SRC
 
 and so on. The definition of append in the Bel source is the same
 principle applied to any number of arguments.
@@ -1340,21 +1420,29 @@ argument like an ordinary function.
 Its purpose is in effect to spread out the elements of a list as if
 they were the arguments in a function call. For example
 
+#+BEGIN_SRC common-lisp
 (apply f '(a b))
+#+END_SRC
 
 is equivalent to
 
+#+BEGIN_SRC common-lisp
 (f 'a 'b)
+#+END_SRC
 
 In the general case apply can take one or more arguments, and is
 equivalent to calling apply on the first argument and all the
 intervening arguments consed onto the last. I.e.
 
+#+BEGIN_SRC common-lisp
 (apply f x y z)
+#+END_SRC
 
 is equivalent to
 
+#+BEGIN_SRC common-lisp
 (apply f (cons x y z))
+#+END_SRC
 
 It's common to use apply in functions like append that take any
 number of arguments. Using apply is in a sense the converse of using
@@ -1380,17 +1468,25 @@ arguments in a list, instead of exactly two.
 Once we have append it's easy to define snoc, which as its name
 suggests is like a reverse cons,
 
+#+BEGIN_SRC common-lisp
 > (snoc '(a b c) 'd 'e)
 (a b c d e)
+#+END_SRC
 
 and list, which returns a list of its arguments.
 
+#+BEGIN_SRC common-lisp
 > (list)
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (list 'a)
 (a)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (list 'a 'b)
 (a b)
+#+END_SRC
 
 Or more precisely, returns a newly made list of its arguments. If
 you're wondering why we bother appending args to nil rather than
@@ -1399,11 +1495,15 @@ also copy it.
 
 If we defined list as
 
+#+BEGIN_SRC common-lisp
 (def list args args)
+#+END_SRC
 
 and it was called thus
 
+#+BEGIN_SRC common-lisp
 (apply list x)
+#+END_SRC
 
 then the value that list returned would be the same list as x-- not
 merely a list with the same elements, but the same pair-- meaning if
@@ -1415,28 +1515,35 @@ object up in the calling code.
 After list we see map, which in the simplest case returns a list of
 calling its first argument on each element of its second.
 
+#+BEGIN_SRC common-lisp
 > (map car '((a b) (c d) (e f)))
 (a c e)
+#+END_SRC
 
 However, map can take any number of lists, and calls its first
 argument on successive sets of elements from the others.
 
+#+BEGIN_SRC common-lisp
 > (map cons '(a b c) '(1 2 3))
 ((a . 1) (b . 2) (c . 3))
+#+END_SRC
 
 It stops as soon as one list runs out
 
+#+BEGIN_SRC common-lisp
 > (map cons '(a b c) '(1 2))
 ((a . 1) (b . 2))
+#+END_SRC
 
 Like append, map is easier to understand if we start with a version
 that takes exactly two arguments.
-
+#+BEGIN_SRC common-lisp
 (def map2 (f xs)
   (if (no xs)
       nil
       (cons (f (car xs))
             (map2 f (cdr xs)))))
+#+END_SRC
 
 If there are no xs left, then return nil, otherwise cons f of the
 first element onto map2 of f and the remaining elements. Pretty
@@ -1449,11 +1556,15 @@ lists can be collected in ls. We need an additional base case in case
 there are zero of them. Checking for the end of the list, which in
 map2 was
 
+#+BEGIN_SRC common-lisp
 (no xs)
+#+END_SRC
 
 now becomes
 
+#+BEGIN_SRC common-lisp
 (some no ls)
+#+END_SRC
 
 because we stop as soon as any list runs out.
 
@@ -1483,22 +1594,30 @@ macro that isn't part of Bel, then explain fn.
 
 Here is a very simple macro:
 
+#+BEGIN_SRC common-lisp
 (mac nilwith (x)
   (list 'cons nil x))
+#+END_SRC
 
 This definition says that whenever you see an expression like
 
+#+BEGIN_SRC common-lisp
 (nilwith 'a)
+#+END_SRC
 
 transform it into
 
+#+BEGIN_SRC common-lisp
 (cons nil 'a)
+#+END_SRC
 
 and then evaluate that and return its value as the value of the call
 to nilwith.
 
+#+BEGIN_SRC common-lisp
 > (nilwith 'a)
 (nil . a)
+#+END_SRC
 
 So unlike the evaluation of a function call, the evaluation of a
 macro call has two steps:
@@ -1517,12 +1636,16 @@ in the macro call, and whatever it returns is the macro expansion.
 
 For example, the value of nilwith will be equivalent to
 
+#+BEGIN_SRC common-lisp
 (lit mac (lit clo nil (x) (list 'cons nil x))))
+#+END_SRC
 
 If we look at the third element, we see the function that generates
 expansions
 
+#+BEGIN_SRC common-lisp
 (lit clo nil (x) (list 'cons nil x))
+#+END_SRC
 
 which looks just like the definition of nilwith.
 
@@ -1531,16 +1654,20 @@ expressions look as much as possible like the resulting expressions.
 So if you defined nilwith you'd probably do it not as we did above
 but as
 
+#+BEGIN_SRC common-lisp
 (mac nilwith (x)
   `(cons nil ,x))
+#+END_SRC
 
 
 ** Functions
 Now let's work our way up to fn, starting with the following
 simplified version:
 
+#+BEGIN_SRC common-lisp
 (mac fn- (parms expr)
   `(lit clo nil ,parms ,expr))
+#+END_SRC
 
 This is less powerful than the actual fn macro in two ways.
 
@@ -1552,8 +1679,10 @@ This is less powerful than the actual fn macro in two ways.
 But if we don't need either of these things, the functions made by
 fn- work fine:
 
+#+BEGIN_SRC common-lisp
 > ((fn- (x y) (cons x y)) 'a 'b)
 (a . b)
+#+END_SRC
 
 All the extra complexity in the definition of fn is to get those two
 features, the local environment and a body of more than one
@@ -1570,14 +1699,18 @@ Let's try making one by hand with some variable bindings in it. An
 environment is a list of (var . val) pairs, so to make a closure we
 put such a list in the third position of a clo, like this:
 
+#+BEGIN_SRC common-lisp
 (lit clo ((x . a)) (y) (cons x y))
+#+END_SRC
 
 This closure includes an environment in which x has the value a. It
 has one parameter, y, and when called returns the value of x consed
 onto whatever we give as an argument.
 
+#+BEGIN_SRC common-lisp
 > ((lit clo ((x . a)) (y) (cons x y)) 'b)
 (a . b)
+#+END_SRC
 
 Notice that the b was all we passed to the function. The a came from
 within it.
@@ -1590,15 +1723,21 @@ In Bel you can get hold of the global and lexical environments using
 the variables globe and scope respectively. So for example if we
 define foo as
 
+#+BEGIN_SRC common-lisp
 (def foo (x)
   scope)
+#+END_SRC
 
 then it will work something like this
 
+#+BEGIN_SRC common-lisp
 > (foo 'a)
 ((x . a))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (foo 'b)
 ((x . b))
+#+END_SRC
 
 I say "something like" because a repl may have some variables of its
 own, but we know that scope will at least have a value for x.
@@ -1609,8 +1748,10 @@ list that yields a lit expression. It works fine to use a call to
 list rather than an actual list in a function call; functions are
 just lists after all.
 
+#+BEGIN_SRC common-lisp
 > ((list 'lit 'clo nil '(x) '(+ x 1)) 2)
 3
+#+END_SRC
 
 The reason the definition of fn expands into a call to list is so
 that we can incorporate the local environment, which we get by
@@ -1618,20 +1759,26 @@ including scope in the arguments to list.
 
 Here's an example where we do this manually:
 
+#+BEGIN_SRC common-lisp
 (def bar (x)
   ((list 'lit 'clo scope '(y) '(+ x y)) 2))
+#+END_SRC
 
 Within bar we call a hand-made closure that includes scope, which, as
 we know from the example of foo above, will include a value for x.
 
+#+BEGIN_SRC common-lisp
 > (bar 3)
 5
+#+END_SRC
 
 The fn macro generates as its expansion exactly what we just made by
 hand. So this is equivalent to the definition above:
 
+#+BEGIN_SRC common-lisp
 (def bar (x)
   ((fn (y) (+ x y)) 2))
+#+END_SRC
 
 The fn macro has two different expansions depending on how many
 arguments we pass to it. That's so that functions can have bodies of
@@ -1640,22 +1787,29 @@ more than one expression.
 If we call fn with two arguments, meaning a parameter list and an
 expression, as in e.g.
 
+#+BEGIN_SRC common-lisp
 (fn (x) (cons 'a x))
+#+END_SRC
 
 then (cdr body) will be false, so the expansion will be
 
+#+BEGIN_SRC common-lisp
 (list 'lit 'clo scope '(x) '(cons 'a x))
+#+END_SRC
 
 If we call fn with three or more arguments, meaning a parameter list
 plus two or more expressions, e.g.
-
+#+BEGIN_SRC common-lisp
 (fn (x)
   (prn 'hello)
   (cons 'a x))
+#+END_SRC
 
 Then the expansion wraps a do around the expressions.
 
+#+BEGIN_SRC common-lisp
 (list 'lit 'clo scope '(x) '(do (prn 'hello) (cons 'a x)))
+#+END_SRC
 
 We haven't seen do yet, but it's coming soon. It makes multiple
 expressions into a block of code.
@@ -1683,18 +1837,24 @@ code.
 Suppose you want to evaluate two expressions in order and then return
 the value of the last.
 
+#+BEGIN_SRC common-lisp
 e1
 e2
+#+END_SRC
 
 You can make this happen by embodying e2 in a function that you then
 call on e1.
 
+#+BEGIN_SRC common-lisp
 ((fn x e2) e1)
+#+END_SRC
 
 When this expression is evaluated, e1 will be evaluated first, and
 its value passed to the function in the car of the call:
 
+#+BEGIN_SRC common-lisp
 (fn x e2)
+#+END_SRC
 
 Then e2 will be evaluated, ignoring the value of e1 passed in the
 parameter, and its value returned. Result: e1 and then e2 get
@@ -1705,10 +1865,12 @@ deal with that in a minute.)
 This technique generalizes to blocks of any size. Here's one with 3
 expressions:
 
+#+BEGIN_SRC common-lisp
 ((fn x ((fn x e3) e2)) e1)
+#+END_SRC
 
 You can use reduce to generate this kind of expression as follows
-
+#+BEGIN_SRC common-lisp
 (def block args
   (reduce (fn (x y)
             (list (list 'fn 'x y) x))
@@ -1716,6 +1878,7 @@ You can use reduce to generate this kind of expression as follows
 
 > (block 'e1 'e2 'e3)
 ((fn x ((fn x e3) e2)) e1)
+#+END_SRC
 
 and this is almost exactly what the do macro does. If you look at
 its definition, it's almost identical to that of block.
@@ -1731,26 +1894,32 @@ don't care what parameter we use, so long as it's unique.
 
 If you want to establish a lexical binding for some variable, you do
 it with let, which is a very simple macro upon fn.
-
+#+BEGIN_SRC common-lisp
 > (let x 'a
     (cons x 'b))
 (a . b)
+#+END_SRC
 
 Since let expands into a fn, you have the full power of Bel parameter
 lists in the first argument.
-
+#+BEGIN_SRC common-lisp
 > (let (x . y) '(a b c)
     (list x y))
 (a (b c))
+#+END_SRC
 
 The macro macro is analogous to the fn macro in that it returns a
 literal macro. You'll rarely use these directly, but you could if you
 wanted to.
 
+#+BEGIN_SRC common-lisp
 > ((macro (v) `(set ,v 'a)) x)
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > x
 a
+#+END_SRC
 
 
 ** The definition of def
@@ -1777,8 +1946,10 @@ programming languages, it only evaluates as many arguments as it
 needs to, which means you can use it for control flow as well as
 logical disjunction.
 
+#+BEGIN_SRC common-lisp
 > (or 'a (prn 'hello))
 a
+#+END_SRC
 
 The definition of or is the first recursive macro definition we've
 seen. Unless it has no arguments, an or will expand into another or.
@@ -1789,10 +1960,12 @@ constructing a circular list and applying or to it.)
 
 In effect
 
+#+BEGIN_SRC common-lisp
 (or foo bar)
+#+END_SRC
 
 expands into
-
+#+BEGIN_SRC common-lisp
 (let x foo
   (if x
       x
@@ -1800,16 +1973,18 @@ expands into
         (if y
             y
             nil))))
+#+END_SRC
 
 except that we can't actually use variables like x and y to hold the
 values, and instead have to use uvars.
 
 Notice incidentally that the expression above could be optimized
-
+#+BEGIN_SRC common-lisp
 (let x foo
   (if x
       x
       bar))
+#+END_SRC
 
 but the definition of or doesn't try to; like every definition in
 Bel, its purpose is to define what or means, not to provide an
@@ -1820,10 +1995,14 @@ do that you get only the logical aspect of or and not the control
 aspect, since in a call to apply the arguments have already all been
 evaluated.
 
+#+BEGIN_SRC common-lisp
 > (apply or '(nil nil))
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (apply or '(nil a b))
 a
+#+END_SRC
 
 
 ** And
@@ -1831,11 +2010,15 @@ The and macro is similar in spirit to or, but different in its
 implementation. Whereas or uses recursion to generate its expansion,
 and uses reduce. Since
 
+#+BEGIN_SRC common-lisp
 (and w x y z)
+#+END_SRC
 
 is equivalent to
 
+#+BEGIN_SRC common-lisp
 (if w (if x (if y z)))
+#+END_SRC
 
 it's an obvious candidate for reduce.
 
@@ -1856,10 +2039,14 @@ The next function, =, is the one that programs usually use to test
 for equality. It returns true iff its arguments are trees of the same
 shape whose leaves are the same atoms.
 
+#+BEGIN_SRC common-lisp
 > (id '(a b) '(a b))
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (= '(a b) '(a b))
 t
+#+END_SRC
 
 In Bel, everything that's not a symbol, character, or stream is a
 pair. Numbers and strings are pairs, for example. So you'd never
@@ -1869,12 +2056,16 @@ for identical list structure.
 In the definition of = we see the first instance of square bracket
 notation.
 
+#+BEGIN_SRC common-lisp
 (all [id _ (car args)] (cdr args))
+#+END_SRC
 
 This is equivalent to
 
+#+BEGIN_SRC common-lisp
 (all (fn (x) (id x (car args)))
      (cdr args))
+#+END_SRC
 
 I.e., is everything in the cdr of args id to the car? You know you
 can use id to test equality at this point, because if one of the args
@@ -1885,7 +2076,9 @@ If id took any number of arguments (it doesn't, because I want axioms
 to be as weak as possible), the preceding all expression could have
 been simply
 
+#+BEGIN_SRC common-lisp
 (apply id args)
+#+END_SRC
 
 The next four functions are predicates for the four types. All use =
 for this test even though all could use id. My rule is to use =
@@ -1898,12 +2091,18 @@ Then we see proper, which tells us whether something is a proper
 list. Informally, a proper list is one that we don't need a dot to
 display.
 
+#+BEGIN_SRC common-lisp
 > (proper nil)
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (proper '(a . b))
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (proper '(a b))
 t
+#+END_SRC
 
 Formally, something is a proper list if it's either nil or a pair
 whose cdr is a proper list, which is exactly what the definition
@@ -1912,19 +2111,27 @@ says.
 In Bel, a proper list of characters is called a string, and has a
 special notation: zero or more characters within double quotes.
 
+#+BEGIN_SRC common-lisp
 > (string "foo")
 t
+#+END_SRC
 
 
 ** mem
 The next function, mem, tests for list membership.
 
+#+BEGIN_SRC common-lisp
 > (mem 'b '(a b c))
 (b c)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (mem 'e '(a b c))
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (mem \a "foobar")
 "ar"
+#+END_SRC
 
 Since it uses some, it returns the rest of the list starting with the
 thing we're looking for, rather than simply t.
@@ -1936,26 +2143,33 @@ can be followed by an expression, and if no value is supplied for the
 parameter in the call, it gets the value of that expression instead
 (or nil if there isn't one). So
 
+#+BEGIN_SRC common-lisp
 > ((fn (x (o y)) y) 'a)
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > ((fn (x (o y 'b)) y) 'a)
 b
+#+END_SRC
 
 The optional parameter doesn't have to be a single symbol; it can be
 a full parameter list. An example will be easier to understand if we
 use let:
-
+#+BEGIN_SRC common-lisp
 > (let (x (o (y . z) '(a . b))) '(f)
     (list x y z))
 (f a b)
+#+END_SRC
 
 In the definition of mem, the optional parameter is a comparison
 function, which defaults, as such functions usually will, to =.
 By supplying different comparison functions we can get different
 behaviors out of mem.
 
+#+BEGIN_SRC common-lisp
 > (mem 3 '(2 4 6 8) >)
 (4 6 8)
+#+END_SRC
 
 
 ** in
@@ -1980,17 +2194,20 @@ If case is given an even number of arguments, the last one is the
 default. Otherwise the default is nil.
 
 E.g. this function
-
+#+BEGIN_SRC common-lisp
 (def sname (s)
   (case s
     + 'plus
-    - 'minus
+    + 'minus
       'unknown))
+#+END_SRC
 
 returns the name of a sign represented by a symbol:
 
+#+BEGIN_SRC common-lisp
 > (sname '+)
 plus
+#+END_SRC
 
 
 ** iflet macro
@@ -1998,11 +2215,12 @@ The iflet macro lets you use the result of a test in an if. It works
 like an ordinary if, except that it takes an initial variable, which
 in any then expression will be lexically bound to the value returned
 by the preceding test expression.
-
+#+BEGIN_SRC common-lisp
 > (iflet x nil      'foo
            '(a b c) (car x)
                     'bar)
 a
+#+END_SRC
 
 Notice how similar the definitions of case and iflet are, despite
 their different purposes. They're both recursive macros, like or,
@@ -2010,29 +2228,33 @@ and both work through their arguments two at a time.
 
 We use iflet to define aif, which implicitly binds the variable it
 to the value of the preceding test expression.
-
+#+BEGIN_SRC common-lisp
 > (map (fn (x)
          (aif (cdr x) (car it)))
        '((a) (b c) (d e f) (g)))
 (nil c e nil)
+#+END_SRC
 
 The function given to map here tests whether x has a non-nil cdr,
 and if so returns the car of it.
 
 With aif and some, it's trivial to define find, which returns the
 first element of a list that matches some test.
-
+#+BEGIN_SRC common-lisp
 > (find [= (car _) \a]
         '("pear" "apple" "grape"))
 "apple"
+#+END_SRC
 
 
 ** begin function
 The begins function returns true iff its first argument is a list
 that begins with its second argument:
 
+#+BEGIN_SRC common-lisp
 > (begins '(a b c d e) '(a b))
 t
+#+END_SRC
 
 Like mem, it takes an optional comparison function that defaults
 to =.
@@ -2042,8 +2264,10 @@ to =.
 It's used in caris, which returns true iff its first argument is a
 pair whose car is its second.
 
+#+BEGIN_SRC common-lisp
 > (caris '(a b) 'a)
 t
+#+END_SRC
 
 
 This is one of those functions you end up using surprisingly often,
@@ -2056,10 +2280,14 @@ Our next function, hug, applies a function to pairs of elements of a
 list. Since the default function is list, by default it simply
 returns pairs of elements.
 
+#+BEGIN_SRC common-lisp
 > (hug '(a b c d e))
 ((a b) (c d) (e))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (hug '(1 2 3 4 5) +)
 (3 7 5)
+#+END_SRC
 
 This too is something you need surprisingly often, especially when
 operating on expressions, where it's common to have subexpressions
@@ -2068,62 +2296,81 @@ iflet, and we see it implemented with hug in the next macro, with,
 which is a multi-variable let.
 
 ** With
+#+BEGIN_SRC common-lisp
 > (with (x 'a
          y 'b)
     (cons x y))
 (a . b)
+#+END_SRC
 
 It binds the variables in parallel in the sense that the bindings of
 previous variables are not visible in the expressions defining the
 values of later ones.
-
+#+BEGIN_SRC common-lisp
 > (let x 'a
     (with (x 'b
            y x)
       y))
 a
+#+END_SRC
 
 
 ** Keep and Rem
 The next function, keep, returns all the elements of a list that pass
 some test
 
+#+BEGIN_SRC common-lisp
 > (keep odd '(1 2 3 4 5))
 (1 3 5)
+#+END_SRC
 
 and rem removes its first argument from a list
 
+#+BEGIN_SRC common-lisp
 > (rem \a "abracadabra")
 "brcdbr"
+#+END_SRC
 
 or more precisely, since it takes an optional comparison function f,
 all the elements of the list that fail [f _ x], where x is the first
 argument.
 
+#+BEGIN_SRC common-lisp
 > (rem 4 '(5 3 1 2 4) >=)
 (3 1 2)
+#+END_SRC
 
 
 ** Get and put
 The next two functions, get and put, are for operating on key-value
 stores represented as lists of pairs like this one:
 
+#+BEGIN_SRC common-lisp
 > (set x '((a . 1) (b . 2) (c . 3)))
 ((a . 1) (b . 2) (c . 3))
+#+END_SRC
 
 The first, get, retrieves entries,
 
+#+BEGIN_SRC common-lisp
 > (get 'a x)
 (a . 1)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (get 'z x)
 nil
+#+END_SRC
 
 and the second, put, creates them.
 
+#+BEGIN_SRC common-lisp
 > (put 'z 26 x)
 ((z . 26) (a . 1) (b . 2) (c . 3))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (put 'a 9 x)
 ((a . 9) (b . 2) (c . 3))
+#+END_SRC
 
 The reason get returns the whole pair instead of just the associated
 value is so that we can distinguish between a key having a value of
@@ -2136,25 +2383,33 @@ something onto x wouldn't change the value of it.
 ** Rev snap, udrop, idfn,
 The function rev reverses a list,
 
+#+BEGIN_SRC common-lisp
 > (rev "able")
 "elba"
+#+END_SRC
 
 and snap breaks off a piece of its second argument that's as long as
 its first, returning both parts:
 
+#+BEGIN_SRC common-lisp
 > (snap '(a b) '(1 2 3 4 5))
 ((1 2) (3 4 5))
+#+END_SRC
 
 It's used in udrop (for "unary drop"), which returns just the
 remaining part:
 
+#+BEGIN_SRC common-lisp
 > (udrop '(a b) '(1 2 3 4 5))
 (3 4 5)
+#+END_SRC
 
 Then we get the identity function, idfn:
 
+#+BEGIN_SRC common-lisp
 > (map idfn '(a b c))
 (a b c)
+#+END_SRC
 
 
 You wouldn't call this directly (why bother?) but you often end up
@@ -2165,8 +2420,10 @@ using it as a default or when operating on functions.
 The function is is a little unusual in that it returns a function for
 comparing its argument to something.
 
+#+BEGIN_SRC common-lisp
 > ((is 'a) 'a)
 t
+#+END_SRC
 
 An is is a partially applied =, so in principle we won't need it
 after we define partial application later on. But this case is so
@@ -2182,21 +2439,26 @@ One thing we see being used for the first time here is dynamic
 binding. To show how it works, we'll define a function that refers to
 a variable with no global value:
 
+#+BEGIN_SRC common-lisp
 (def foo ()
   snerg)
+#+END_SRC
 
 If we call foo normally, we'll get an error saying snerg has no
 value. But if we call foo within a dyn expression that creates a
 dynamic binding for snerg, it will work:
-
+#+BEGIN_SRC common-lisp
 > (dyn snerg 'a
     (foo))
 a
+#+END_SRC
 
 We couldn't get the same result by saying
 
+#+BEGIN_SRC common-lisp
 (let snerg 'a
   (foo))
+#+END_SRC
 
 because a lexical binding created by let (or more precisely by a
 function call) is only visible within its body. And whereas lexical
@@ -2217,44 +2479,54 @@ continuation, which you can then save. Let's try making one.
 
 Here's some simple code that makes a list:
 
+#+BEGIN_SRC common-lisp
 > (list 'a 'b)
 (a b)
+#+END_SRC
 
 Now let's try replacing the 'b with an expression that saves the
 current continuation before returning b:
-
+#+BEGIN_SRC common-lisp
 (list 'a (ccc (fn (c)
                   (set cont c)
                   'b)))
 (a b)
+#+END_SRC
 
 It returns the same value, but in the process we've set cont to the
 continuation at the point where the ccc occurred. If we call cont
 with some value, our old computation will be restarted as if that
 value had been returned by the ccc expression:
 
+#+BEGIN_SRC common-lisp
 > (cont 'z)
 (a z)
+#+END_SRC
 
 Continuations work any number of times:
 
+#+BEGIN_SRC common-lisp
 > (cont 'w)
 (a w)
+#+END_SRC
 
 One thing we can use continuations for is aborting computations. If
 we save a continuation before starting something, then by calling the
 continuation we can escape from the middle of it.
-
+#+BEGIN_SRC common-lisp
 > (ccc (fn (c)
          (dyn abort c
            (do (abort 'a)
                (car 'b)))))
 a
+#+END_SRC
 
 Here we bind abort to the continuation before we start evaluating the
 do expression. The second expression within the do
 
+#+BEGIN_SRC common-lisp
 (car 'b)
+#+END_SRC
 
 would cause an error if it were evaluated. But we never get to it,
 because we call abort first.
@@ -2264,11 +2536,12 @@ error. So if the variable that we dynamically bind is err instead of
 abort, we can take over what happens when an error is signalled.
 
 Here we rebind err to return hello when an error occurs:
-
+#+BEGIN_SRC common-lisp
 > (ccc (fn (c)
          (dyn err (fn (x) (c 'hello))
            (car 'b))))
 hello
+#+END_SRC
 
 This time the car expression does get evaluated, which causes an
 error to be signalled. But by establishing a dynamic binding for
@@ -2279,10 +2552,11 @@ ccc expression.
 You can probably imagine how you'd write a macro to evaluate an
 expression in an error-proof way: just make the expansion put the
 expression within something like
-
+#+BEGIN_SRC common-lisp
 (ccc (fn (c)
        (dyn err (fn (x) (c nil))
          expression)))
+#+END_SRC
 
 except of course you'd want to use a uvar instead of c.
 
@@ -2291,28 +2565,32 @@ except of course you'd want to use a uvar instead of c.
 Now let's look at eif. It's like if except that which of its
 arguments get evaluated depends not on whether its test expression
 returns true, but whether it causes an error.
-
+#+BEGIN_SRC common-lisp
 > (eif x (car 'a)
          'oops
          x)
 oops
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (eif x (car '(a b))
          'oops
          x)
 a
+#+END_SRC
 
 The variable before the test expression (in this case x) will be
 lexically bound either to the value returned by the test expression,
 or to whatever err was called with if an error occurred.
 
 The expansion of the first eif above looks like
-
+#+BEGIN_SRC common-lisp
 (let v (join)
   (let w (ccc (fn (c)
                 (dyn err [c (cons v _)] (car 'a))))
     (if (caris w v id)
         (let x (cdr w) 'oops)
         (let x w x))))
+#+END_SRC
 
 except of course v, w, and c will be uvars. When we look at the code
 above, we can see how eif tells whether the value it got back from
@@ -2328,37 +2606,49 @@ are two more, onerr and safe, that are more commonly used. The
 onerr macro takes two expressions and returns the value of the first
 if the second causes an error:
 
+#+BEGIN_SRC common-lisp
 > (onerr 'oops (car 'a))
 oops
+#+END_SRC
 
 and the safe macro simply returns nil if the expression within
 it causes an error:
 
+#+BEGIN_SRC common-lisp
 > (safe (car '(a b)))
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (safe (car 'a))
 nil
+#+END_SRC
 
 
 ** The literal, variable, and isa function
 The next function, literal, returns true iff its argument evaluates
 to itself,
 
+#+BEGIN_SRC common-lisp
 > (map literal (list nil "foo" car))
 (t t t)
+#+END_SRC
 
 while variable returns true iff its argument is a variable, meaning
 an ordinary symbol or a uvar:
 
+#+BEGIN_SRC common-lisp
 > (map variable (list 'x (uvar) t))
 (t t nil)
+#+END_SRC
 
 And isa is for checking whether something is a particular kind of
 lit. Like is, isa doesn't do the check, but returns a function that
 does
 
+#+BEGIN_SRC common-lisp
 > ((isa 'clo) map)
 t
+#+END_SRC
 
 
 
@@ -2377,14 +2667,18 @@ structures, and these always have the same parameter names.
 
 Each thread is a list
 
+#+BEGIN_SRC common-lisp
 (s r)
+#+END_SRC
 
 of two stacks: a stack s of expressions to be evaluated, and a stack
 r of return values.
 
 Each element of s is in turn a list
 
+#+BEGIN_SRC common-lisp
 (e a)
+#+END_SRC
 
 where e is an expression to be evaluated, and a is a lexical
 environment consisting of a list of (var . val) pairs.
@@ -2398,7 +2692,9 @@ of (var . val) pairs. I use the variable g for this.
 
 The most common parameter list we'll see is
 
+#+BEGIN_SRC common-lisp
 (s r m)
+#+END_SRC
 
 where s is the current expression stack, r is the current return
 value stack, and m is a list (p g) of the other threads and the
@@ -2409,7 +2705,9 @@ expression e and starts the interpreter running with a single thread
 in which e is to be evaluated. The arguments it sends to ev represent
 the usual (s r m) triple. So
 
+#+BEGIN_SRC common-lisp
 (list (list e nil))
+#+END_SRC
 
 is an expression stack containing nothing except e, to be evaluated
 in a null environment. The second argument, nil, is the return value
@@ -2446,7 +2744,9 @@ call to the interpreter with a shorter expression stack and the
 return value consed onto the return stack. And that's what we see
 happening in the code that runs when e is a literal:
 
+#+BEGIN_SRC common-lisp
 (mev s (cons e r) m)
+#+END_SRC
 
 That is what returning a value looks like.
 
@@ -2477,10 +2777,11 @@ list, if we keep the current thread on the front, it keeps running.
 Now that we've seen how mev and sched work, let's return to ev. If e
 is a variable, we call vref to evaluate it. And what vref ordinarily
 does is this:
-
+#+BEGIN_SRC common-lisp
 (aif (lookup v a s g)
      (mev s (cons (cdr it) r) m)
      (sigerr 'unbound s r m))
+#+END_SRC
 
 You may now recognize that kind of call to mev: that's returning a
 value. If the lookup succeeds, it returns the (var . val) pair it
@@ -2527,11 +2828,12 @@ Calling err is crying oneself.
 But what about the first half of vref, the one in which (inwhere s)
 returns true? This code is for handling assignments. In Bel, any
 value that lives in a pair can be assigned using set. For example,
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (set (cadr x) 'z)
     x)
 (a z c)
+#+END_SRC
 
 This code in vref is what makes it happen. It works as follows. When
 we're in a set, another special entry (beginning as usual with smark)
@@ -2572,7 +2874,9 @@ The first of these is smark, the pair we created for marking stack
 entries that are not just ordinary expressions. The initial value of
 forms
 
+#+BEGIN_SRC common-lisp
 (set forms (list (cons smark evmark)))
+#+END_SRC
 
 means that when the expression we've just taken off the stack
 begins with smark, we should call evmark. And in the definition of
@@ -2592,8 +2896,10 @@ stack once we'd found it. So if we return up through a loc entry,
 that means we were unable to find a pair to modify, and we should
 signal an error. E.g.
 
+#+BEGIN_SRC common-lisp
 > (set \a 5)
 Error: unfindable
+#+END_SRC
 
 A fut (future) stack entry contains a closure to be called on
 (s r m). The interpreter inserts these when it needs to do
@@ -2629,7 +2935,7 @@ and returns it unevaluated.
 
 The definition of quote will be transformed by formfn into the
 equivalent of
-
+#+BEGIN_SRC common-lisp
 (fn v
   (eif w (apply (fn (e) (list e))
                 (car v))
@@ -2637,6 +2943,7 @@ equivalent of
          (let (e) w
            (let (a s r m) (cdr v)
              (mev s (cons e r) m)))))
+#+END_SRC
 
 The test expression in the eif accumulates all the form's parameters.
 If an error occurs while doing that, we signal an error. (We know
@@ -2650,8 +2957,10 @@ that one. At least not short of using a single parameter to hold all
 the arguments, and then teasing them out manually. Since that would
 make form definitions ugly, the form macro does it for you.
 
+#+BEGIN_SRC common-lisp
 > (quote a b)
 Error: bad-form
+#+END_SRC
 
 Next comes the definition of if. Unlike quote, if does several
 things, and when we do several things in a form, we don't just
@@ -2664,7 +2973,9 @@ argument and then, if there are more arguments, evaluate the
 appropriate one depending on the value of the first. Which is
 basically the code translated into English. Putting
 
+#+BEGIN_SRC common-lisp
 (list (car es) a)
+#+END_SRC
 
 on the stack is "evaluate the first argument," and the conditional
 that puts a closure that calls if2 on the stack, but only if (cdr es)
@@ -2682,16 +2993,22 @@ succeeding expression, so we just put (car es) onto the stack and go.
 But if the first expression returned nil, we need to keep going.
 If we're evaluating
 
+#+BEGIN_SRC common-lisp
 (if a b c d e)
+#+END_SRC
 
 and a returns nil, then the value of the if expression is the value
 of
 
+#+BEGIN_SRC common-lisp
 (if c d e)
+#+END_SRC
 
 and that is exactly what if2 is doing when it puts
 
+#+BEGIN_SRC common-lisp
 (cons 'if (cdr es))
+#+END_SRC
 
 on the stack. So the if form is recursive in the sense that it can
 cause another if expression to end up on the stack, where it will of
@@ -2711,16 +3028,19 @@ argument saying whether to create a new binding for a variable if
 there isn't one already. It asks for e to be evaluated by putting
 the conventional
 
+#+BEGIN_SRC common-lisp
 (list e a)
+#+END_SRC
 
 on the stack. But also, adjacent to this, it puts a special loc entry
 on the stack saying that what we want when evaluating e is its
 location, not its value. This will be seen by inwhere in functions
 like vref and handled accordingly.
-
+#+BEGIN_SRC common-lisp
 > (let x 'a
     (where x))
 ((x . a) d)
+#+END_SRC
 
 This return value is a list of the actual lexical binding created by
 that let, plus a d indicating that the value in question is in the
@@ -2750,11 +3070,12 @@ environments. This is not a coincidence. It means the code that sets
 global or lexical variables also sets dynamic bindings; in fact, the
 code doesn't even know which type it's operating on; all it knows is
 that it's doing something to the cdr of a pair.
-
+#+BEGIN_SRC common-lisp
 > (dyn x 'a
     (do (set x 'b)
         x))
 b
+#+END_SRC
 
 This wasn't a deliberate design choice. Like many other aspects of
 Bel, it's just a consequence of making the interpreter as simple as
@@ -2802,11 +3123,12 @@ function within the macro, (caddr mac), to the unevaluated arguments,
 args. This generates the macroexpansion. But the macroexpansion then
 has to be evaluated, and that's the purpose of this closure we put on
 the stack:
-
+#+BEGIN_SRC common-lisp
 (fu (s r m)
   (mev (cons (list (car r) a) s)
        (cdr r)
        m)
+#+END_SRC
 
 The (car r) within it is a sign of something unusual happening: we're
 moving something (the macroexpansion) from the return value stack to
@@ -2822,15 +3144,18 @@ Functions aren't the only thing you can apply in Bel. You can apply
 anything if you define a way to do it. We haven't gotten to this yet,
 but numbers for example return the corresponding element of a list:
 
+#+BEGIN_SRC common-lisp
 > (3 '(a b c d))
+#+END_SRC
 c
 
 Such expressions are also settable:
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c d)
     (set (3 x) 'z)
     x)
 (a b z d)
+#+END_SRC
 
 Since the thing we're about to apply might be a settable reference,
 the first thing we need to check in applyprim is whether we're in
@@ -2848,10 +3173,11 @@ We don't need many locs; knowing how to set the car or cdr of a pair
 will handle most cases. When we look at the loc for car, it's pretty
 simple: it just "returns" (by consing onto the return stack) a list
 of the argument and an a, to indicate we're looking in the car.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (where (car x)))
 ((a b c) a)
+#+END_SRC
 
 The loc for cdr is similarly simple.
 
@@ -2871,8 +3197,10 @@ Since primitives can take at most two arguments, we pick out two,
 which we call a and b. Since car and cdr of nil both yield nil, this
 is how we make missing arguments to primitives default to nil.
 
+#+BEGIN_SRC common-lisp
 > (join)
 (nil)
+#+END_SRC
 
 If the call is a legal one, we call the primitive with the same name.
 This is another place where behavior leaks from the instance of Bel
@@ -2919,38 +3247,52 @@ Before we look at them I should explain a feature of Bel parameter
 lists that we haven't encountered yet: type checking. A parameter of
 the form
 
+#+BEGIN_SRC common-lisp
 (t v f)
+#+END_SRC
 
 means that unless f is true of the value passed to v, an error will
 be signalled. So if we define
 
+#+BEGIN_SRC common-lisp
 (def consa ((t xs pair))
   (cons 'a xs))
+#+END_SRC
 
 and we call it with an argument that's not a pair, we'll get an
 error:
 
+#+BEGIN_SRC common-lisp
 > (consa 'z)
 Error: mistype
+#+END_SRC
 
 If the variable and test in a t parameter are symbols, you can simply
 conjoin them with a vertical bar.
 
+#+BEGIN_SRC common-lisp
 (def consa (xs|pair)
   (cons 'a xs))
+#+END_SRC
 
 The reader expands x|y into (t x y).
 
 You can nest t parameters, o parameters, and parameters that are
 pairs without restriction.
 
+#+BEGIN_SRC common-lisp
 (def foo ((o (t (x . y) [caris _ 'a]) '(a . b)))
   x)
+#+END_SRC
 
+#+BEGIN_SRC common-lisp
 > (foo '(b b))
 Error: mistype
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (foo)
 a
+#+END_SRC
 
 Though as you can see, programs get hard to read if you do too much
 computation in the parameter list.
@@ -3029,15 +3371,19 @@ If arg is nil and the first parameter in our list isn't an optional
 one, then we know the function was called with too few arguments,
 and we signal an error.
 
+#+BEGIN_SRC common-lisp
 > ((fn (x y) x) 'a)
 Error: underargs
+#+END_SRC
 
 The other error case is when arg is a non-nil atom. We can match such
 an argument with a single parameter, but not with a list of
 parameters. So if arg is an atom, we signal an error.
 
+#+BEGIN_SRC common-lisp
 > ((fn ((x y)) x) 'a)
 Error: atom-arg
+#+END_SRC
 
 The default clause of destructure is the "normal" case where we have
 a non-empty list of arguments. Here we also use mev to do a
@@ -3049,10 +3395,14 @@ building as the environment when it puts expressions on the stack
 means the bindings of earlier parameters are visible to the code in
 later ones:
 
+#+BEGIN_SRC common-lisp
 > ((fn (x (o y x)) y) 'a)
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > ((fn (f x|f) x) pair 'a)
 Error: mistype
+#+END_SRC
 
 Now to continue with our own depth-first traversal of the
 interpreter, back up in applylit, which we're halfway through. The
@@ -3072,11 +3422,15 @@ it's just a list of s and r. The work is done when the continuation
 is called. But even then it's not that much work. If a continuation
 is
 
+#+BEGIN_SRC common-lisp
 (lit cont s2 r2)
+#+END_SRC
 
 you could call it on an argument a simply by saying
 
+#+BEGIN_SRC common-lisp
 (mev s2 (cons a r2) m)
+#+END_SRC
 
 except for two things. One is that you have to check that the form of
 the continuation is valid, just as you do with a closure. The other
@@ -3095,8 +3449,10 @@ continuations. Otherwise it would be one line in applylit.
 Finally, in the last clause of applylit, we see the code that makes
 it possible, for example, to use a number in functional position:
 
+#+BEGIN_SRC common-lisp
 > (2 '(a b c))
 b
+#+END_SRC
 
 The variable virfns (for virtual functions) is a list of (n . f)
 pairs where n is a type of lit and f is a function that generates an
@@ -3107,17 +3463,23 @@ they're a lot like macros.
 Although we haven't introduced numbers yet, here's the virtual
 function for them, so you can see what one looks like:
 
+#+BEGIN_SRC common-lisp
 (vir num (f args)
   `(nth ,f ,@args))
+#+END_SRC
 
 It looks like a macro definition, and does much the same thing.  It
 will turn
 
+#+BEGIN_SRC common-lisp
 (2 '(a b c))
+#+END_SRC
 
 into
 
+#+BEGIN_SRC common-lisp
 (nth 2 '(a b c))
+#+END_SRC
 
 There's a good deal more of the language still to come, including
 numbers and I/O, but we have now seen the entire Bel interpreter.
@@ -3127,26 +3489,34 @@ numbers and I/O, but we have now seen the entire Bel interpreter.
 Next come several functions for operating on functions. The first,
 function, tells whether something is a function and if so what kind.
 
+#+BEGIN_SRC common-lisp
 > (map function (list car append 'foo))
 (prim clo nil)
+#+END_SRC
 
 The next, con, returns a constant function:
 
+#+BEGIN_SRC common-lisp
 > (map (con 'yo) '(a b c))
 (yo yo yo)
+#+END_SRC
 
 Then comes an important one, compose, which takes any number of
 functions and returns their composition. For example, cadr is
 equivalent to a composition of car and cdr:
 
+#+BEGIN_SRC common-lisp
 > ((compose car cdr) '(a b c))
 b
+#+END_SRC
 
 When the names of what you're composing are symbols or numbers, Bel
 lets you abbreviate calls to compose with colons.
 
+#+BEGIN_SRC common-lisp
 > (car:cdr '(a b c))
 b
+#+END_SRC
 
 Functional composition lets you eliminate a lot of unnecessary
 variables. I warned earlier that the definitions that occur early in
@@ -3159,20 +3529,26 @@ them. If you had to define cadr in idiomatic Bel you'd say
 There's a special abbreviation for composing no, which is to prepend
 a tilde.
 
+#+BEGIN_SRC common-lisp
 > (map ~cdr '((a) (a b c) (a b)))
 (t nil nil)
+#+END_SRC
 
 Now we can understand the idiomatic definition of all that I gave
 early on:
 
+#+BEGIN_SRC common-lisp
 (def all (f xs)
   (~some ~f xs))
+#+END_SRC
 
 It's actually inaccurate to say that compose operates on functions,
 because it can operate on anything that we can call like a function.
 
+#+BEGIN_SRC common-lisp
 > (2:or nil '(a b c))
 b
+#+END_SRC
 
 I could solve this problem by inventing some new term for things
 that can be called like functions, but that seems a bit bogus, so
@@ -3185,30 +3561,37 @@ The next function, combine, produces something more general: it takes
 one argument, f, and returns a function that combines functions using
 f. So this for example
 
+#+BEGIN_SRC common-lisp
 ((combine and) car cdr)
+#+END_SRC
 
 will yield a function equivalent to
-
+#+BEGIN_SRC common-lisp
 (fn (x)
   (and (car x) (cdr x)))
 
 > (map ((combine and) car cdr)
        '((a . nil) (a . b) (nil . b)))
 (nil t nil)
+#+END_SRC
 
 Since combine of and and or are so frequently needed, we predefine
 two functions, cand and cor, for those cases.
 
+#+BEGIN_SRC common-lisp
 > ((cand pair cdr) '(a b))
 (b)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > ((cor char pair) 'a)
 nil
+#+END_SRC
 
 Next come the two classic reduction functions, left and right fold.
 Once again, their definitions are complicated by taking any number of
 arguments, and they're easier to understand if we start with
 three-argument versions:
-
+#+BEGIN_SRC common-lisp
 (def foldl3 (f base xs)
   (if (no xs)
       base
@@ -3218,6 +3601,7 @@ three-argument versions:
   (if (no xs)
       base
       (f (car xs) (foldr3 f base (cdr xs)))))
+#+END_SRC
 
 When we look at these versions it's clear that left fold works by
 growing the base case and then returning it when we get to the end of
@@ -3226,54 +3610,69 @@ builds its value on the way back up.
 
 Here is a series of equivalent calls showing how a left fold plays
 out:
-
+#+BEGIN_SRC common-lisp
 (foldl3 cons nil '(a b))
 (foldl3 cons (cons 'a nil) '(b))
 (foldl3 cons (cons 'b (cons 'a nil)) nil)
+#+END_SRC
 
 This yields (b a). The corresponding right fold,
-
+#+BEGIN_SRC common-lisp
 (foldr3 cons nil '(a b))
 (cons 'a (foldr3 cons nil '(b)))
 (cons 'a (cons 'b (foldr3 cons nil nil)))
 
 yields (a b).
+#+END_SRC
 
 For comparison, the reduce function we already have is a right fold
 where the base case is the last element of the list.
 
 The next function, of, is for situations like the following:
 
+#+BEGIN_SRC common-lisp
 (+ (car x) (car y) (car z))
+#+END_SRC
 
 With it you can write
 
+#+BEGIN_SRC common-lisp
 ((of + car) x y z)
+#+END_SRC
 
 And upon is a sort of reverse call, in the sense that it saves an
 argument, and then tells you what calling things on that argument
 will return:
-
+#+BEGIN_SRC common-lisp
 > (map (upon '(a b c))
        (list car cadr cdr))
 (a b (b c))
+#+END_SRC
 
 The next function, pairwise, returns true iff its first argument is
 true of every two-element window in the second. For example
 
+#+BEGIN_SRC common-lisp
 (pairwise f '(a b c d))
+#+END_SRC
 
 is equivalent to
 
+#+BEGIN_SRC common-lisp
 (and (f 'a 'b) (f 'b 'c) (f 'c 'd))
+#+END_SRC
 
 That expression
 
+#+BEGIN_SRC common-lisp
 (all [id _ (car args)] (cdr args))
+#+END_SRC
 
 in the definition of = would have been
 
+#+BEGIN_SRC common-lisp
 (pairwise id args)
+#+END_SRC
 
 if we'd had pairwise then.
 
@@ -3283,46 +3682,56 @@ together the results of calling the function on successive elements
 of the lists. Which description incidentally demonstrates the
 advantage of source code over natural language in a spec.
 
+#+BEGIN_SRC common-lisp
 > (fuse [list 'a _] '(1 2 3))
 (a 1 a 2 a 3)
+#+END_SRC
 
 We use it in letu, which is for creating uvars. In eif we had to say
-
+#+BEGIN_SRC common-lisp
 (with (v (uvar)
        w (uvar)
        c (uvar))
   ...)
+#+END_SRC
 
 With letu that becomes
 
+#+BEGIN_SRC common-lisp
 (letu (v w c)
   ...)
+#+END_SRC
 
 You can also make one uvar by using a single variable instead of a
 list of variables.
 
 We use letu in pcase, which is like a case statement but with
 predicates as the keys.
-
+#+BEGIN_SRC common-lisp
 > (map [pcase _
          no   'empty
          atom 'atom
               'pair]
        '(a nil '(b c)))
 (atom empty pair)
+#+END_SRC
 
 The next function, match, is like = except that functions occurring
 in the second argument are treated as predicates, and ts match
 everything.
 
+#+BEGIN_SRC common-lisp
 > (match '(a (b) c d) (list 'a pair 'c t))
 t
+#+END_SRC
 
 The split function breaks its second argument at the point where its
 first argument returns true.
 
+#+BEGIN_SRC common-lisp
 > (split (is \a) "frantic")
 ("fr" "antic")
+#+END_SRC
 
 The next two macros are for conditionally evaluating blocks of code:
 when's body is evaluated when the test is true, and unless's when
@@ -3335,7 +3744,9 @@ and not to provide an efficient implementation.
 
 Numbers in Bel take the form
 
+#+BEGIN_SRC common-lisp
 (lit num (sign n d) (sign n d))
+#+END_SRC
 
 where the first (sign n d) is the real component and the second the
 imaginary component. A sign is either + or -, and n and d are unary
@@ -3343,17 +3754,23 @@ integers (i.e. lists of t) representing a numerator and denominator.
 
 So 2/3 is
 
+#+BEGIN_SRC common-lisp
 (lit num (+ (t t) (t t t)) (+ () (t)))
+#+END_SRC
 
 and 4-1/2i is
 
+#+BEGIN_SRC common-lisp
 (lit num (+ (t t t t) (t)) (- (t) (t t)))
+#+END_SRC
 
 You'll never see this representation unless you go looking for it,
 because Bel reads and writes numbers in the conventional way.
 
+#+BEGIN_SRC common-lisp
 > (lit num (+ (t t) (t t t)) (+ () (t)))
 2/3
+#+END_SRC
 
 We're going to build numbers up from the bottom, starting with
 operators for unary integers and finally defining the operators one
@@ -3390,19 +3807,25 @@ operation.
 After buildnum and recip we see the definitions of the +, -, *, and /
 functions that are actually used in programs.
 
+#+BEGIN_SRC common-lisp
 > (+ .05 (/ 19 20))
 1
+#+END_SRC
 
 Now that we have numbers we can define some common functions that use
 them, like len for finding the length of a list
 
+#+BEGIN_SRC common-lisp
 > (len "foo")
 3
+#+END_SRC
 
 and pos for finding the position of something in one
 
+#+BEGIN_SRC common-lisp
 > (pos \a "ask")
 1
+#+END_SRC
 
 (In Bel, lists are one-indexed.)
 
@@ -3410,8 +3833,10 @@ We use pos in charn, which returns a unique integer for each
 character based on its position in chars, a list of all the
 characters.
 
+#+BEGIN_SRC common-lisp
 > (map charn "abc")
 (97 98 99)
+#+END_SRC
 
 We can also define functions for comparing numbers, and more
 generally for comparing things that can be transformed into numbers
@@ -3431,10 +3856,14 @@ definition we see the four predefined comparison functions, for
 reals, chars, strings, and symbols. So < and > work for arguments of
 those types,
 
+#+BEGIN_SRC common-lisp
 > (> 3/4 2/3)
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (< 'apple 'apply)
 t
+#+END_SRC
 
 and if you use com to define a comparison function for other kinds of
 objects, < and > will work for them too.
@@ -3449,38 +3878,52 @@ Next comes a familiar name, yc. This is the Y combinator, which is
 used to generate recursive functions. It's used in rfn to make a
 recursive function with a name,
 
+#+BEGIN_SRC common-lisp
 > ((rfn foo (x) (if (no x) 0 (inc:foo:cdr x))) '(a b c))
 3
+#+END_SRC
 
 and rfn in turn is used to define afn, which lets you refer to a
 function within itself as self.
 
+#+BEGIN_SRC common-lisp
 > ((afn (x) (if (no x) 0 (inc:self:cdr x))) '(a b c))
 3
+#+END_SRC
 
 We use afn in wait, which takes a function and calls it till it
 returns a non-nil value.
 
+#+BEGIN_SRC common-lisp
 > (set x '(nil nil a b c))
 (nil nil a b c)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (wait (fn () (pop x)))
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > x
 (b c)
+#+END_SRC
 
 (We haven't defined pop yet but it's the usual pop.)
 
 The function runs takes a function and a list and breaks up the list
 into stretches for which the function returns true or false.
 
+#+BEGIN_SRC common-lisp
 > (runs pint '(1 1 0 0 0 1 1 1 0))
 ((1 1) (0 0 0) (1 1 1) (0))
+#+END_SRC
 
 Using whitec, which returns true of whitespace characters, we can use
 runs to pick the words out of a string:
 
+#+BEGIN_SRC common-lisp
 > (tokens "the age of the essay")
 ("the" "age" "of" "the" "essay")
+#+END_SRC
 
 But since tokens can take any function or object to treat as a break,
 you can use it for more than picking out words.
@@ -3488,8 +3931,10 @@ you can use it for more than picking out words.
 The function dups returns all the elements of a list that occur more
 than once in it.
 
+#+BEGIN_SRC common-lisp
 > (dups "abracadabra")
 "abr"
+#+END_SRC
 
 The next function, simple, is a predicate true of atoms and numbers.
 You need this for e.g. the base case of tree traversals.
@@ -3501,32 +3946,41 @@ example soon when we get to the queue functions.
 The consif function conses something onto the front of a list only if
 it's non-nil.
 
+#+BEGIN_SRC common-lisp
 > (consif (cadr '(a)) '(x y))
 (x y)
+#+END_SRC
 
 The check macro evaluates an expression and returns its value only if
 its second argument returns true of it.
 
+#+BEGIN_SRC common-lisp
 > (check (car '(1 2 3)) odd)
 1
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (check (car '(1 2 3)) even)
 nil
+#+END_SRC
 
 The optional third argument is an expression to evaluate to get an
 alternate value in case the function returns false.
 
+#+BEGIN_SRC common-lisp
 > (check (car '(1 2 3)) even 2)
 2
+#+END_SRC
 
 The withs macro is like with except that the bindings of the
 preceding variables are visible in the expressions defining the
 values of later ones.
-
+#+BEGIN_SRC common-lisp
 > (let x 'a
     (withs (x 'b
             y x)
       y))
 b
+#+END_SRC
 
 The bind macro is like a call to dyn with a body. Since bind is a
 generalization of dyn, you would not ordinarily use dyn in programs.
@@ -3541,23 +3995,31 @@ you can protect them by wrapping an atomic around them.
 The tail function returns the rest of its second argument from the
 point where its first argument returns true of it, if any.
 
+#+BEGIN_SRC common-lisp
 > (tail [caris _ \-] "non-nil")
 "-nil"
+#+END_SRC
 
 The function dock takes the last element off a list
 
+#+BEGIN_SRC common-lisp
 > (dock '(a b c))
 (a b)
+#+END_SRC
 
 while lastcdr returns the last non-nil cdr of a list
 
+#+BEGIN_SRC common-lisp
 > (lastcdr '(a b c))
 (c)
+#+END_SRC
 
 and last uses it to get the last element.
 
+#+BEGIN_SRC common-lisp
 > (last '(a b c))
 c
+#+END_SRC
 
 Now come three functions for manipulating queues. A queue is
 represented as a list within a list. That way several variables can
@@ -3566,12 +4028,18 @@ be set to the same queue.
 If you modify the middle of a list that is the value of several
 variables, the modification is shared:
 
+#+BEGIN_SRC common-lisp
 > (set x '(a b c) y x)
 (a b c)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (set (cadr x) 'z)
 z
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > y
 (a z c)
+#+END_SRC
 
 But there is no way to put something on the front of a list in a way
 that will be shared by multiple variables that were set to it. We
@@ -3579,41 +4047,65 @@ haven't gotten to push yet, but I'll use it anyway to make this
 clear. When you push something on the front of a list, you're
 modifying the value of a variable, not the list structure itself.
 
+#+BEGIN_SRC common-lisp
 > (push 'hello x)
 (hello a z c)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > x
 (hello a z c)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > y
 (a z c)
+#+END_SRC
 
 To modify a value that several variables share, you have to be able to
 translate it into changing the car or cdr of some existing pair. And
 if the shared value is a list within a list, you can.
 
+#+BEGIN_SRC common-lisp
 > (set x '((a)) y x)
 ((a))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > y
 ((a))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (push 'hello (car x))
 (hello a)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > y
 ((hello a))
+#+END_SRC
 
 That's why queues are represented as lists within lists.
 
 You make a new queue with newq, put something in a queue with enq,
 and take something off with deq.
 
+#+BEGIN_SRC common-lisp
 > (set x (newq))
 (nil)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (enq 'a x)
 ((a))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (enq 'b x)
 ((a b))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (deq x)
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > x
 ((b))
+#+END_SRC
 
 Notice enq and deq use atomic. Otherwise you could get errors if code
 in another thread did something to a queue while you were in the
@@ -3625,21 +4117,25 @@ an expression in which a where is wrapped around p, and then the
 appropriate half of the resulting pair is set to the value of e.
 So e.g.
 
+#+BEGIN_SRC common-lisp
 (set (car x) 'a)
+#+END_SRC
 
 is expanded into the equivalent of
-
+#+BEGIN_SRC common-lisp
 (atomic (let v 'a
           (let (cell loc) (where (car x) t)
             ((case loc a xar d xdr) cell v))))
+#+END_SRC
 
 We also have a more general macro, zap, that modifies the value of
 something by applying a function to it.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (zap cdr x)
     x)
 (b c)
+#+END_SRC
 
 It's instructive to compare the definitions of set and zap. They're
 much the same, except that zap has to wrap a call to apply around the
@@ -3653,28 +4149,31 @@ but zapping one shouldn't.
 With zap it becomes easy to write a whole class of other macros we
 need, like ++ and --, which increase and decrease the value of
 something
-
+#+BEGIN_SRC common-lisp
 > (let x '(1 2 3)
     (++ (car x) 10)
     (-- (cadr x))
     x)
 (11 1 3)
+#+END_SRC
 
 and push and pull, which put something onto the front of a list and
 remove something from one
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (push 'z x)
     (pull 'c x)
     x)
 (z a b)
+#+END_SRC
 
 Since pull passes the optional comparison function to rem, we can say
-
+#+BEGIN_SRC common-lisp
 > (let x '(7 3 0 9 2 4 1)
     (pull 4 x >=)
     x)
 (3 0 2 1)
+#+END_SRC
 
 I think this sort of "porosity" is in general a good idea. There's a
 case to be made for treating functions as black boxes, but with
@@ -3724,12 +4223,16 @@ returns. I.e. if a source has characters waiting to be read, repeated
 calls to peek will return the same character, and repeated calls to
 rdc will return successive ones.
 
+#+BEGIN_SRC common-lisp
 > (let s '("abc")
     (list (peek s) (peek s)))
 "aa"
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (let s '("abc")
     (list (rdc s) (rdc s)))
 "ab"
+#+END_SRC
 
 The structure of rdc is similar to that of peek. First check if the
 argument is a stream. If it is, either return whatever's stored in
@@ -3742,10 +4245,14 @@ Then come some functions for recognizing types of characters.
 Whether a character is a digit depends on the base, which is why
 digit takes an optional base argument.
 
+#+BEGIN_SRC common-lisp
 > (digit \a)
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (digit \a i16)
 t
+#+END_SRC
 
 The next function, breakc, returns true iff a character signals the
 end of a symbol or number. Among the characters treated as breakcs
@@ -3785,14 +4292,19 @@ in the interpreter, it mattered that the cars of such entries were id
 to smark and not merely = to it. The Bel printer and reader use
 labels of the form #n, where n is whole number, to mark shared pairs.
 For example:
-
+#+BEGIN_SRC common-lisp
 > (let x '(a)
     (list x x))
 (#1=(a) #1)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (set x '(a #1=(b) #1 c))
 (a #1=(b) #1 c)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (id (2 x) (3 x))
 t
+#+END_SRC
 
 The share parameter keeps track of shared objects we've read so far,
 and their labels. It's passed to most functions in the reader, and
@@ -3852,8 +4364,10 @@ seeing must be an unbalanced parenthesis.
 There's a similar pattern for \[ and \], except that we do something
 with the list we've read: we make it into a fn expression.
 
+#+BEGIN_SRC common-lisp
 > (read '("[cons _ 'b]"))
 (fn (_) (cons _ (quote b)))
+#+END_SRC
 
 The sym for \\ shows how characters are represented. A backslash can
 either be followed by the character itself, or the name of one. The
@@ -3869,21 +4383,27 @@ backslash acts as an escape character, meaning whatever occurs next
 is treated as part of the sequence, even if it's the delimiter that
 would otherwise signal the end.
 
+#+BEGIN_SRC common-lisp
 > "foo\"bar"
 "foo\"bar"
+#+END_SRC
 
 The escape character is not part of the string, just something used
 in its representation.
 
+#+BEGIN_SRC common-lisp
 > (mem \\ "foo\"bar")
 nil
+#+END_SRC
 
 The character \¦ acts as a delimiter for symbol names that could not
 otherwise be read. It works just like \" except that we call sym on
 the result.
 
+#+BEGIN_SRC common-lisp
 > '¦foo bar¦
 ¦foo bar¦
+#+END_SRC
 
 As we saw earlier, the character \# indicates shared list structure.
 If the #n occurs alone, it refers to a previously seen object; if
@@ -3898,7 +4418,9 @@ cell, and returns that. Why? Why not just return e? So that we can
 read lists that contain themselves. If we want to be able to read
 something like
 
+#+BEGIN_SRC common-lisp
 #1=(a #1 b)
+#+END_SRC
 
 we need to add it to the list of shared objects before reading it. Or
 more precisely, add to the list of shared objects a pair that we will
@@ -3915,8 +4437,10 @@ bar used in type specs. There is nothing specific to parameter lists
 about this bar, incidentally; it's just something the reader expands
 into a list beginning with t.
 
+#+BEGIN_SRC common-lisp
 > 'for|2
 (t for 2)
+#+END_SRC
 
 If there's no vertical bar, we look for the intrasymbol characters
 \. and \!. These are expanded by the reader into common expressions.
@@ -3928,47 +4452,65 @@ a!b expands into (a 'b)
 So for example if you wanted to insist that a parameter was a
 continuation, instead of expressing the parameter as
 
+#+BEGIN_SRC common-lisp
 (t c (isa 'cont))
+#+END_SRC
 
 you could just write
 
+#+BEGIN_SRC common-lisp
 c|isa!cont
+#+END_SRC
 
 and our recent example
 
+#+BEGIN_SRC common-lisp
 (id (2 x) (3 x))
+#+END_SRC
 
 could have been written
 
+#+BEGIN_SRC common-lisp
 (id 2.x 3.x)
+#+END_SRC
 
 I haven't used this notation so far in the Bel spec, but it's quite
 convenient. Any combination of \. and \! is allowed.
 
+#+BEGIN_SRC common-lisp
 > 'a!b.c
 (a (quote b) c)
+#+END_SRC
 
 If there is nothing before the first \. or \!, the missing symbol is
 treated as an implicit upon.
 
+#+BEGIN_SRC common-lisp
 > '!a
 (upon (quote a))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (let x '(a . b)
     (map .x (list car cdr)))
 (a b)
+#+END_SRC
 
 The next level of precedence, represented by parsecom, is intrasymbol
 colons. These, as we've seen, are abbreviations for compose
 expressions.
 
+#+BEGIN_SRC common-lisp
 > 'a:b:c
 (compose a b c)
+#+END_SRC
 
 The next level of predence is prepended tildes, which as we've also
 seen are abbreviations for no expressions. Here's some of each:
 
+#+BEGIN_SRC common-lisp
 > 'x|~f:g!a
 (t x ((compose (compose no f) g) (quote a)))
+#+END_SRC
 
 The lowest level of precedence is the else clause of parseno, where
 we try to parse a number, and failing that (since there can now be no
@@ -3997,6 +4539,7 @@ list-building functions cons and append. To get an idea of what we're
 aiming at, here are some backquoted expressions followed by their
 expansions:
 
+#+BEGIN_SRC common-lisp
   `(x ,y)          (cons (quote x) (cons y nil))
 
   `(x ,@y)         (cons (quote x) (append y nil))
@@ -4008,6 +4551,7 @@ expansions:
   `(x . ,@y)       (apply cons (quote x) y)
 
   `(,@x . ,@y)     (apply append x y)
+#+END_SRC
 
 These are not quite the expansions generated by bquote. I've cut some
 error-checking code to make them clearer.
@@ -4015,7 +4559,7 @@ error-checking code to make them clearer.
 Much of the complexity of bqex is due to the need to handle nested
 backquotes. We'll find it easier to understand bqex if we start with
 a version that doesn't:
-
+#+BEGIN_SRC common-lisp
 (def bqex1 (e)
   (if (no e)   (list nil nil)
       (atom e) (list (list 'quote e) nil)
@@ -4037,6 +4581,7 @@ a version that doesn't:
                   `(cons ,a ,d))
               t)
         (list (list 'quote e) nil))))
+#+END_SRC
 
 Now it's easier to follow what will happen to an expression as it
 gets expanded.
@@ -4046,8 +4591,10 @@ value indicating whether anything changed in generating it. For
 example, if we expand an expression containing no commas or
 comma-ats, nothing need change.
 
+#+BEGIN_SRC common-lisp
 > (bqex1 '(x y z))
 ((quote (x y z)) nil)
+#+END_SRC
 
 That call will go through the last clause of bqex1, and then, since
 the recursive calls to bqex1 on the car and cdr at the start of
@@ -4059,24 +4606,29 @@ base cases of bqex1 are for when the whole of e is a comma or
 comma-at expression. When it's a comma expression, the expansion is
 simply its argument.
 
+#+BEGIN_SRC common-lisp
 > (bqex1 '(comma x))
 (x t)
+#+END_SRC
 
 But when it's a comma-at expression, the expansion is a call to
 splice:
 
+#+BEGIN_SRC common-lisp
 > (bqex1 '(comma-at x))
 ((splice x) t)
+#+END_SRC
 
 What's splice? If we look at its definition, it simply signals an
 error. Why generate an expansion that signals an error? Because if
 the expression we're expanding is a naked comma-at, meaning one
 that's not within a list, we should signal an error; there's nothing
 to splice the value into.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     `,@x)
 Error: comma-at-outside-list
+#+END_SRC
 
 Now let's see what happens when we have comma and comma-at
 expressions within a list. In that case we call bqexpair1, which
@@ -4085,33 +4637,47 @@ together to make an expansion for the whole list.
 
 Suppose we're expanding
 
+#+BEGIN_SRC common-lisp
 `(,x . ,@y)
+#+END_SRC
 
 The car and cdr of this list are the two cases we just examined.
 I.e. within bqexpair1
 
+#+BEGIN_SRC common-lisp
 (a achange)
+#+END_SRC
 
 will be
 
+#+BEGIN_SRC common-lisp
 (x t)
+#+END_SRC
 
 and
 
+#+BEGIN_SRC common-lisp
 (d dchange)
+#+END_SRC
 
 will be
 
+#+BEGIN_SRC common-lisp
 ((splice y) t)
+#+END_SRC
 
 What happens when these get put together? Since the car of d is a
 splice expression and the car of a isn't, we go through this clause
 
+#+BEGIN_SRC common-lisp
 `(apply cons ,a (spd ,(cadr d)))
+#+END_SRC
 
 yielding
 
+#+BEGIN_SRC common-lisp
 (apply cons x (spd y))
+#+END_SRC
 
 Notice that the splice put on the front of its return value by bqex1
 is taken back off when the return value gets back to bqexpair1.
@@ -4122,20 +4688,22 @@ The call to spd is the error-checking code that I mentioned I cut
 from the examples above. As long as y is the right sort of value,
 meaning a list of one element, spd simply returns it. But it also
 signals an error if it's not.
-
+#+BEGIN_SRC common-lisp
 > (let x '(b c)
     `(a . ,@x))
 Error: splice-multiple-cdrs
+#+END_SRC
 
 You can't splice anything except a one-element list into the cdr of
 a pair. The case above is like writing (a . b c), which is
 ill-formed.
 
 Here's an example of this expansion in action:
-
+#+BEGIN_SRC common-lisp
 > (with (x 'a y '(b))
     `(,x . ,@y))
 (a . b)
+#+END_SRC
 
 All the code that you see in the Bel source but not in bqex1 is for
 dealing with nested backquotes. The additional argument, n, is the
@@ -4160,10 +4728,11 @@ if they're ever called. In a well-formed backquote expression they
 never do get called, because they're expanded away. They only get
 called when there are "leftover" commas or comma-ats that don't have
 matching backquotes.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
        `,,x)
 Error: comma-outside-backquote
+#+END_SRC
 
 
 ** Printer
@@ -4192,7 +4761,9 @@ Nearly all the complexity in prsymbol is for dealing with symbols
 that need to have \¦s around their names because otherwise they'd be
 unreadable. If it weren't for that possibility, prsymbol could be
 
+#+BEGIN_SRC common-lisp
 (map [prc _ s] (nom x))
+#+END_SRC
 
 The way we check if a symbol needs to have \¦s around its name is by
 calling read on the characters in its name. If we don't get the same
@@ -4205,8 +4776,10 @@ This in turn calls rrep to generate fractional representations of
 unsigned rationals. Bel can read numbers in decimal format, but
 internally they're rationals and are displayed that way.
 
+#+BEGIN_SRC common-lisp
 > 1.5
 3/2
+#+END_SRC
 
 Now back up to print, where the next clause is for printing strings.
 This is complicated by the fact that strings are lists and can thus
@@ -4216,8 +4789,10 @@ structure with anything in names, then we can simply print it as a
 series of characters between double quotes (using presc in case there
 is a double quote in the string).
 
+#+BEGIN_SRC common-lisp
 > "foo"
 "foo"
+#+END_SRC
 
 The next clause in print checks whether the thing we're printing is
 one of the shared objects in names. If it is, we have to display it
@@ -4234,27 +4809,34 @@ calling print recursively on the car. Then we have to decide how to
 print the cdr. If it's simple, or a unique string, or shared
 structure, we display the list as a dotted list.
 
+#+BEGIN_SRC common-lisp
 > (cons 'a 5)
 (a . 5)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (cons x x))
 (#1=(a b c) . #1)
+#+END_SRC
 
 Otherwise we print a space and call prelts recursively on rest.
 
+#+BEGIN_SRC common-lisp
 > (append '(a b c) 5)
 (a b c . 5)
+#+END_SRC
 
 
 Finally come a couple of functions for printing in specific
 situations. The first is prn, which is used to display data, e.g. for
 debugging. It takes any number of arguments and prints them separated
 by spaces, followed by a newline.
-
+#+BEGIN_SRC common-lisp
 > (with (x "foo" y 'bar)
     (prn 'x x 'y y))
 x "foo" y bar
 bar
+#+END_SRC
 
 It returns the value of the last, so you can wrap a call to prn
 around any expression in your code without changing what it returns.
@@ -4263,8 +4845,10 @@ The second, pr, is for displaying messages to humans. If you're
 looking at data, you want to print strings in double quotes, but if
 you're printing a message to a user, you probably don't. E.g.
 
+#+BEGIN_SRC common-lisp
 (let user 'Dave
   (pr "I'm sorry, " user ". I'm afraid I can't do that."))
+#+END_SRC
 
 will print
 
@@ -4276,73 +4860,88 @@ It calls prnice to print its arguments in a readable form.
 ** Drop function
 The drop function takes n elements off the front of a list
 
+#+BEGIN_SRC common-lisp
 > (drop 2 '(a b c d e))
 (c d e)
+#+END_SRC
 
 
 ** Accessing array elements
 and nth returns the nth element of one.
 
+#+BEGIN_SRC common-lisp
 > (nth 2 '(a b c d e))
 b
+#+END_SRC
 
 As I mentioned earlier, lists in Bel are 1-indexed.
 
 We use nth in the virtual function for numbers, which I also included
 earlier.
 
+#+BEGIN_SRC common-lisp
 > (2 '(a b c))
 b
+#+END_SRC
 
 We see this in use in nchar, which is the converse of charn. It
 converts a number to a character.
 
+#+BEGIN_SRC common-lisp
 > (nchar 65)
 \A
+#+END_SRC
 
 The first function is the complement of drop. It returns a list of
 the first n elements of a list.
 
+#+BEGIN_SRC common-lisp
 > (first 2 '(a b c d e))
 (a b)
+#+END_SRC
 
-**
-** TODO Catch
+** Catch
 The catch macro is used to establish a continuation to which we can
 throw control if we want to abort a computation. It dynamically binds
 throw to the continuation, so whatever argument we give to throw will
 be returned as the value of the catch expression.
-
+#+BEGIN_SRC common-lisp
 > (catch
     (throw 'a)
     (/ 1 0))
 a
+#+END_SRC
 
 
 ** Cut
 The cut function returns the elements of a list from its second
 argument to its third inclusive,
 
+#+BEGIN_SRC common-lisp
 > (cut "foobar" 2 4)
 "oob"
+#+END_SRC
 
 unless the second argument is negative, in which case it indicates
 how many elements to take off the end of the list.
 
+#+BEGIN_SRC common-lisp
 > (cut "foobar" 2 -1)
 "ooba"
+#+END_SRC
 
 The whenlet macro is to when as iflet is to if. It's used in awhen,
 which is to when as aif is to if.
 
 The each macro causes its body to be evaluated with a variable bound
 to successive elements of a list.
-
+#+BEGIN_SRC common-lisp
 > (let x nil
        (each y '(a b c)
          (push y x))
        x)
 (c b a)
+#+END_SRC
 
 
 ** Function on function
@@ -4350,44 +4949,60 @@ Now come several functions on functions. The first, flip, takes a
 function and returns a function that calls it with the parameters
 reversed.
 
+#+BEGIN_SRC common-lisp
 > ((flip -) 1 10)
 9
+#+END_SRC
 
 The next, part, is for partial application. It takes a function and
 several arguments, and returns a function that will call it with
 those arguments plus whatever additional ones are supplied.
 
+#+BEGIN_SRC common-lisp
 > ((part cons 'a) 'b)
 (a . b)
+#+END_SRC
 
 As its name suggests, trap is a backwards part; it puts the newer
 arguments first.
 
+#+BEGIN_SRC common-lisp
 > ((trap cons 'a) 'b)
 (b . a)
+#+END_SRC
 
 Finally, only takes a function and returns a function that calls it
 only if its first argument is non-nil. So instead of
 
+#+BEGIN_SRC common-lisp
 (let x (f)
   (if x (g x)))
+#+END_SRC
 
 or
 
+#+BEGIN_SRC common-lisp
 (aif (f) (g it))
+#+END_SRC
 
 you can say just
 
+#+BEGIN_SRC common-lisp
 (only.g (f))
+#+END_SRC
 
 So for example find, which we defined
 
+#+BEGIN_SRC common-lisp
 (def find (f xs)
   (aif (some f xs) (car it)))
+#+END_SRC
 
 could with only and composition be defined
 
+#+BEGIN_SRC common-lisp
 (set find only.car:some)
+#+END_SRC
 
 Incidentally, these examples show the sort of situation where
 intrasymbol dot notation is useful. You wouldn't want to use it for
@@ -4398,94 +5013,110 @@ These are followed by some functions involving numbers, including
 >= and <=, floor, which returns the largest integer <= its argument,
 and ceil, which returns the smallest integer >= its argument.
 
+#+BEGIN_SRC common-lisp
 > (map (upon 3.5) (list floor ceil))
 (3 4)
+#+END_SRC
 
 The mod function returns its first argument modulo its second,
 
+#+BEGIN_SRC common-lisp
 > (mod 17 3)
 2
+#+END_SRC
 
 
 ** Iteration
 Then come a group of macros for iteration. The first, whilet,
 evaluates its body while a test expression returns true, with a
 variable bound to its value.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (whilet y (pop x)
       (pr y))
     x)
 abcnil
+#+END_SRC
 
 Then comes the general loop macro, which sets a variable to an
 initial value, then updates the value on successive iterations, so
 long as some test expression is true.
-
+#+BEGIN_SRC common-lisp
 > (loop x 1 (+ x 1) (< x 5)
     (pr x))
 1234nil
+#+END_SRC
 
 Several other iteration macros can then be defined in terms of loop,
 starting with while
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (while (pop x)
       (pr x)))
 (b c)(c)nilnil
+#+END_SRC
 
 The til macro evaluates its body with a variable bound to the value
 of one expression till another expression returns true.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c d e)
     (til y (pop x) (= y 'c)
       (pr y))
     x)
 ab(d e)
+#+END_SRC
 
 While it might seem as if you could define whilet simply as
 
+#+BEGIN_SRC common-lisp
 (mac whilet (var expr . body)
   `(til ,var ,expr (no ,var) ,@body))
+#+END_SRC
 
 this would fail if var were a pair.
 
 The for macro starts a variable at some initial value and then
 increments it by 1 on each succeeding pass through the loop, till it
 exceeds some threshold.
-
+#+BEGIN_SRC common-lisp
 > (for x 1 10
     (pr x))
 12345678910nil
+#+END_SRC
 
 The repeat macro simply evaluates its body a certain number of
 times.
-
+#+BEGIN_SRC common-lisp
 > (repeat 3
     (pr 'bang))
 bangbangbangnil
+#+END_SRC
 
 And the poll macro evaluates an expression till a function is true of
 the result, at which point it's returned.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c d e)
     (poll (pop x) is!c)
     x)
 (d e)
+#+END_SRC
 
 The accum macro takes a variable and a body of code and evaluates the
 body with the variable lexically bound to a function that accumulates
 all the values it's called on. It returns the list of values.
-
+#+BEGIN_SRC common-lisp
 > (accum a
     (map (cand odd a) '(1 2 3 4 5)))
 (1 3 5)
+#+END_SRC
 
 It's used in nof, which takes a number and an expression and returns
 the result of evaluating the expression that number of times.
 
+#+BEGIN_SRC common-lisp
 > (nof 10 (rand 10))
 (9 7 6 2 9 1 7 0 0 0)
+#+END_SRC
 
 (Sequences of random numbers never look random enough.)
 
@@ -4493,18 +5124,23 @@ The drain function is a combination of poll and accum. It evaluates
 some expression till it returns nil, or a value passing some other
 optional test, and returns a list of all the values the expression
 returned.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c d e)
     (drain (pop x)))
 (a b c d e)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (let x '(a b c d e)
     (drain (pop x) is!d))
 (a b c)
+#+END_SRC
 
 The ^w function returns a number raised to a whole power.
 
+#+BEGIN_SRC common-lisp
 > (^w 2+3i 3)
 -46+9i
+#+END_SRC
 
 The randlen function returns a random number that can be represented
 in n binary digits, which is the same as saying a random integer
@@ -4521,72 +5157,85 @@ which takes a positive integer n and returns a random integer between
 ** Assignment macros
 Next come a group of macros for assignment, starting with wipe, which
 sets multiple things to nil.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c d e)
     (wipe 2.x 4.x)
     x)
 (a nil c nil e)
+#+END_SRC
 
 Then we get the familiar pop macro, which takes the first element off
 a list and returns it.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (list (pop x) x))
 (a (b c))
+#+END_SRC
 
 Like any macro that uses where for assignment, pop can operate on any
 pair that you can find a way to refer to.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c)
     (pop (cdr x))
     x)
 (a c)
+#+END_SRC
 
 The clean macro removes everything from a list for which its first
 argument returns true:
-
+#+BEGIN_SRC common-lisp
 > (let x '(1 2 3 4 5)
     (clean odd x)
     x)
 (2 4)
+#+END_SRC
 
 And swap rotates the values of its arguments
-
+#+BEGIN_SRC common-lisp
 > (let (x y z) '(a b c)
     (swap x y z)
     (list x y z))
 (b c a)
+#+END_SRC
 
 as a degenerate case of which, if there are two arguments, it swaps
 their values.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c d e)
     (swap 2.x 4.x)
     x)
 (a d c b e)
+#+END_SRC
 
 The adjoin function conses something onto a list only if it's not
 already an element of it.
 
+#+BEGIN_SRC common-lisp
 > (adjoin 'a '(a b c))
 (a b c)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (adjoin 'z '(a b c))
 (z a b c)
+#+END_SRC
 
 It's used in pushnew, which pushes an element on a list if it's not
 already an element.
-
+#+BEGIN_SRC common-lisp
 > (let x '(a b c d e)
     (pushnew 'a x)
     (pushnew 'z x)
     x)
 (z a b c d e)
+#+END_SRC
 
 The dedup function returns a version of list without the later
 instances of duplicate elements.
 
+#+BEGIN_SRC common-lisp
 > (dedup "abracadabra")
 "abrcd"
+#+END_SRC
 
 
 ** Sorting function
@@ -4594,39 +5243,53 @@ Next come a group of functions involving sorting. The first inserts
 an element into a (presumably sorted) list according to a comparison
 function f.
 
+#+BEGIN_SRC common-lisp
 > (insert < 3 '(1 2 4 5))
 (1 2 3 4 5)
+#+END_SRC
 
 Then we get sort itself, which uses insert to sort a list.
 
+#+BEGIN_SRC common-lisp
 > (sort < '(5 1 3 2 4))
 (1 2 3 4 5)
+#+END_SRC
 
 As much as possible of the original order is preserved.
 
+#+BEGIN_SRC common-lisp
 > (sort (of > len) '((a b) (c) (d e) (f)))
 ((a b) (d e) (c) (f))
+#+END_SRC
 
 The best function takes a function and a list and returns the
 element of the list that beats the others according to the function.
 
+#+BEGIN_SRC common-lisp
 > (best > '(5 1 3 2 4))
 5
+#+END_SRC
 
 In case of ties it will return the first.
 
+#+BEGIN_SRC common-lisp
 > (best (of > len) '((a) (b c) (d e) (f)))
 (b c)
+#+END_SRC
 
 It's used by max to return the largest of its arguments
 
+#+BEGIN_SRC common-lisp
 > (max 3 7 2 1)
 7
+#+END_SRC
 
 and by min to return the smallest.
 
+#+BEGIN_SRC common-lisp
 > (min 3 7 2 1)
 1
+#+END_SRC
 
 Sometimes you want to use max and min on individual arguments and
 sometimes on a list. If we define them for the former case we can get
@@ -4634,14 +5297,18 @@ the latter with apply.
 
 The even function returns true of even numbers, and odd of odd ones.
 
+#+BEGIN_SRC common-lisp
 > (map upon.3 (list even odd))
 (nil t)
+#+END_SRC
 
 And round rounds its argument to the nearest integer, choosing even
 integers in case of ties.
 
+#+BEGIN_SRC common-lisp
 > (map round '(-2.5 -1.5 -1.4 1.4 1.5 2.5))
 (-2 -2 -1 1 2 2)
+#+END_SRC
 
 
 ** Functions to operate on files
@@ -4649,11 +5316,12 @@ Next come a group of functions for operating on files. The first is a
 sort of let for files; it opens one, lexically binds the resulting
 stream to a variable within the body, then uses an after to make sure
 the stream gets closed. If we evaluate
-
+#+BEGIN_SRC common-lisp
 (withfile s "foo" 'out
   (print 'hello s)
   (prc \  s)
   (print 'filesystem s))
+#+END_SRC
 
 The file "foo" will contain
 
@@ -4663,54 +5331,67 @@ It's used in from and to, which dynamically bind ins and outs (the
 default input and output streams) to the newly opened file. So if
 we say
 
+#+BEGIN_SRC common-lisp
 (to "foo"
   (map prn '(a b c)))
+#+END_SRC
 
 then "foo" will end up containing
-
+#+BEGIN_SRC common-lisp
 a
 b
 c
+#+END_SRC
 
 and thus
-
+#+BEGIN_SRC common-lisp
 > (from "foo"
     (drain (read)))
 (a b c)
+#+END_SRC
 
 The function readall uses the same technique to read all the objects
 in a file, except it uses a unique pair to signal eof so that it can
 return nil as well.
-
+#+BEGIN_SRC common-lisp
 > (from "foo"
     (readall))
 (a b c)
+#+END_SRC
 
 The load function reads all the objects in a file and also evaluates
 them. This is how you load a file of code.
-
+#+BEGIN_SRC common-lisp
 > (to "example.bel"
     (print '(def foo (x) (cons 'a x))))
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (load "example.bel")
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (foo 'b)
 (a . b)
+#+END_SRC
 
 The record macro is used for making a transcript. It binds outs to a
 newly created queue, then at the end returns the characters it
 contains.
-
+#+BEGIN_SRC common-lisp
 > (record
     (pr 'what)
     (pr \ )
     (pr "he said"))
 "what he said"
+#+END_SRC
 
 The function prs uses it to print its arguments to a string.
 
+#+BEGIN_SRC common-lisp
 > (prs 'what \ "he said")
 "what he said"
+#+END_SRC
 
 
 ** Functions to operate on arrays
@@ -4721,36 +5402,50 @@ list of n-1 dimensional arrays.
 We can get a new array by giving array a list of dimensions and an
 optional default value.
 
+#+BEGIN_SRC common-lisp
 > (set a (array '(2 3) 0))
 (lit arr (lit arr 0 0 0) (lit arr 0 0 0))
+#+END_SRC
 
 Now a is a 2x3 array of zeros.
 
 The vir for arrs means we can use arrays as if they were functions on
 lists of indices, as implemented by aref. Vectors are one-indexed.
 
+#+BEGIN_SRC common-lisp
 > (a 1 1)
 0
+#+END_SRC
 
 If we supply fewer indices than the array has dimensions, we get an
 array back instead of a scalar.
 
+#+BEGIN_SRC common-lisp
 > (a 1)
 (lit arr 0 0 0)
+#+END_SRC
 
 Like any reference to part of a pair, array references are settable.
 
+#+BEGIN_SRC common-lisp
 > (++ (a 1 1) 5)
 5
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > a
 (lit arr (lit arr 5 0 0) (lit arr 0 0 0))
+#+END_SRC
 
 Including references to subarrays:
 
+#+BEGIN_SRC common-lisp
 > (swap (a 1) (a 2))
 (lit arr 5 0 0)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > a
 (lit arr (lit arr 0 0 0) (lit arr 5 0 0))
+#+END_SRC
 
 
 ** Functions to operate on key-value stores
@@ -4759,34 +5454,50 @@ key-value stores.
 
 We make a new one by giving table a list of (key . value) pairs.
 
+#+BEGIN_SRC common-lisp
 > (set k (table '((a . b) (c . d))))
 (lit tab (a . b) (c . d))
+#+END_SRC
 
 The vir for tabs means we can use tables as virtual functions on
 keys.
 
+#+BEGIN_SRC common-lisp
 > (k 'a)
 b
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (k 'z)
 nil
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (map k '(a c))
 (b d)
+#+END_SRC
 
 Because we define a loc whose test is isa!tab and which expands
 into a tabloc expression, we can set table entries and also create
 new ones implicitly.
 
+#+BEGIN_SRC common-lisp
 > (set k!a 1 k!z 2)
 2
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > k
 (lit tab (z . 2) (a . 1) (c . d))
+#+END_SRC
 
 Finally, tabrem removes all entries with certain keys from a table.
 
+#+BEGIN_SRC common-lisp
 > (tabrem k 'z)
 ((a . 1) (c . d))
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > k
 (lit tab (a . 1) (c . d))
+#+END_SRC
 
 
 ** Objects with names fields
@@ -4799,7 +5510,9 @@ We call tem with the name of the template followed by pairs of field
 names and expressions to generate default values for those fields.
 E.g. this defines a two-dimensional point:
 
+#+BEGIN_SRC common-lisp
 (tem point x 0 y 0)
+#+END_SRC
 
 Although we used 0s here, you can use any code in a default
 expression. It will be stored in a closure and called each time a
@@ -4807,14 +5520,18 @@ default value is needed.
 
 Having defined point, we can make new instances with make
 
+#+BEGIN_SRC common-lisp
 > (set p (make point))
 (lit tab (x . 0) (y . 0))
+#+END_SRC
 
 We can supply initial arguments if we want, and if we do they
 override the defaults.
 
+#+BEGIN_SRC common-lisp
 > (set q (make point x 1 y 5))
 (lit tab (x . 1) (y . 5))
+#+END_SRC
 
 Notice that nothing in a point says that it is a point. You can
 easily change that by adding a field called e.g. type, but for
@@ -4823,14 +5540,22 @@ maximum flexibility the language doesn't do it for you.
 Since instances are tables, we can do to them everything we can do to
 tables.
 
+#+BEGIN_SRC common-lisp
 > p!x
 0
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (++ p!x)
 1
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (swap p!x p!y)
 1
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > p
 (lit tab (x . 0) (y . 1))
+#+END_SRC
 
 We can even add and remove fields, which is either powerful or
 alarming depending on how you feel about such things.
@@ -4838,13 +5563,17 @@ alarming depending on how you feel about such things.
 We start to see the potential of intrasymbol characters and upon in
 functions like this one
 
+#+BEGIN_SRC common-lisp
 (set above (of > !y))
+#+END_SRC
 
 which tells if points are above another in the sense of having
 greater y-coordinates.
 
+#+BEGIN_SRC common-lisp
 > (above q p (make point))
 t
+#+END_SRC
 
 Finally, the function readas reads a table as an instance of a
 template. The fields that we read are treated as if they were initial
