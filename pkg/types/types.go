@@ -15,6 +15,8 @@ const (
 	NIL
 	SYMBOL
 	MODULE
+	LAMBDA
+	PRIMITIVE
 )
 
 type BrutAny interface {}
@@ -114,7 +116,7 @@ func (bModule BrutModule) String() string{
 }
 
 /*
-* Integers
+* Numbers
 */
 
 type BrutNumber struct {
@@ -158,14 +160,43 @@ func (bSym BrutSymbol) String() string{
 * lambda
 */
 
-type BrutLambdaBody struct{
-	params []BrutSymbol
-	body BrutList
+// type BrutLambda struct{
+// 	params []BrutSymbol
+// 	body BrutList
+// }
+
+// func (BrutLambda) GetType() ObjectType{
+// 	return LAMBDA
+// }
+
+// func (bLambda BrutLambda) String() string{
+// 	result := ""
+// 	for _,current_param :=range bLambda.params {
+// 		result += current_param + " "
+// 	}
+// 	result += bLambda.String()
+
+// 	return result
+// }
+
+/*
+* BrutPrimitive
+*/
+
+type BrutPrimitive struct{
+	FN func(BrutList)BrutType
 }
 
-type BrutLambda struct{
-	param BrutList
-	body []BrutLambdaBody
+func NewBrutPrimitive(fn func(BrutList)BrutType)BrutPrimitive{
+	return BrutPrimitive{FN:fn}
+}
+
+func (BrutPrimitive) GetType() ObjectType{
+	return PRIMITIVE
+}
+
+func (BrutPrimitive) String() string{
+	return "Primitive"
 }
 
 
@@ -173,16 +204,25 @@ type BrutLambda struct{
 * Environment
 */
 
-type Env struct{
+type BrutEnv struct{
 	value map[string]BrutType
 }
 
-func NewEnv() Env{
-	return Env{value: make(map[string]BrutType)}
+func NewBrutEnv() BrutEnv{
+	return BrutEnv{value: make(map[string]BrutType)}
 }
 
-func (e Env) LookUp(sym BrutSymbol)BrutType{
-	return e.value[sym.String()]
+func (e BrutEnv) Set(sym BrutSymbol, val BrutType) BrutEnv{
+	e.value[sym.String()] = val
+	return e
+}
+
+func (e BrutEnv) LookUp(sym BrutSymbol)BrutType{
+	if val, ok := e.value[sym.String()]; ok {
+		return val
+	} else {
+		panic("Lookup failed: " + sym.String())
+	}
 }
 
 // func (e Env) Set(sym types.BrutSymbol, val types.BrutType) Env{
