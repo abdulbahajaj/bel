@@ -7,16 +7,16 @@ import (
 
 func Sum(l types.BrutList)types.BrutType{
 	sum := 0.0
-	for _, el := range l.Elements{
+	for _, el := range l{
 		if el.GetType() == types.NUMBER{
-			sum += el.(types.BrutNumber).Value
+			sum += float64(el.(types.BrutNumber))
 		}
 	}
-	return types.NewBrutNumber(sum)
+	return types.BrutNumber(sum)
 }
 
 func GetPrimitiveEnv() types.BrutEnv{
 	env := types.NewBrutEnv()
-	env = env.Set(types.NewBrutSymbol("+"), types.NewBrutPrimitive(Sum))
+	env = env.Set(types.BrutSymbol("+"), types.BrutPrimitive(Sum))
 	return env
 }

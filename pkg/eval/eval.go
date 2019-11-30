@@ -11,14 +11,14 @@ import (
 
 func func_invoke(fn_call types.BrutList, env types.BrutEnv) types.BrutType{
 	evaluatedList := types.NewBrutList()
-	for _, val := range fn_call.Elements {
+	for _, val := range fn_call {
 		evaluatedList = evaluatedList.Append(recEval(val, env))
 	}
-	function := evaluatedList.Elements[0].(types.BrutPrimitive)
-	evaluatedList.Elements = evaluatedList.Elements[1:]
+	function := evaluatedList[0].(types.BrutPrimitive)
+	evaluatedList = evaluatedList[1:]
 	function.String()
 	// return types.NewBrutNumber(10)
-	return function.FN(evaluatedList)
+	return function(evaluatedList)
 }
 
 
@@ -29,7 +29,7 @@ func func_invoke(fn_call types.BrutList, env types.BrutEnv) types.BrutType{
 func isAtom(bType types.BrutType) bool{
 	for _, objType := range []types.ObjectType{
 		types.LIST,
-		types.MODULE,
+		types.STACK,
 	} {
 		if bType.GetType() == objType{
 			return false
@@ -54,8 +54,8 @@ func recEval(bType types.BrutType, env types.BrutEnv) types.BrutType{
 func Eval(bType types.BrutType) types.BrutType{
 	env := primitives.GetPrimitiveEnv()
 	return_stack := types.NewBrutList()
-	if bType.GetType() == types.MODULE {
-		for _, exp := range bType.(types.BrutModule).Expressions {
+	if bType.GetType() == types.STACK {
+		for _, exp := range bType.(types.BrutStack) {
 			return_stack = return_stack.Append(recEval(exp, env))
 		}
 		return return_stack

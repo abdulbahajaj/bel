@@ -17,6 +17,7 @@ const (
 	MODULE
 	LAMBDA
 	PRIMITIVE
+	STACK
 )
 
 type BrutAny interface {}
@@ -31,26 +32,15 @@ type BrutType interface {
 * Lists
 */
 
-type BrutList struct {
-	Elements []BrutType
-}
+type BrutList []BrutType
+
 
 func NewBrutList() BrutList {
-	return BrutList{Elements: make([]BrutType,0 )}
+	return make(BrutList, 0)
 }
 
 func (bList BrutList) Append(el BrutType) BrutList{
-	exist := ""
-	for _, el := range bList.Elements {
-		exist += el.String() + " "
-	}
-	bList.Elements = append(bList.Elements, el)
-
-	exist = ""
-	for _, el := range bList.Elements {
-		exist += el.String() + " "
-	}
-
+	bList = append(bList, el)
 	return bList
 }
 
@@ -61,11 +51,11 @@ func (BrutList) GetType() ObjectType {
 func (bList BrutList) String() string {
 	result := ""
 
-	if len(bList.Elements) == 0 {
+	if len(bList) == 0 {
 		return "()"
 	}
 
-	for _, el := range bList.Elements {
+	for _, el := range bList {
 		result += el.String()
 		result += " "
 	}
@@ -80,79 +70,36 @@ func (bList BrutList) String() string {
 * Tables
 */
 
-type BrutTable struct {
-	Value map[BrutType]BrutType
-}
-
-func NewBrutTable() BrutTable{
-	return BrutTable{}
-}
+type BrutTable map[BrutType]BrutType
 
 
-/*
-* Module
-*/
-
-type BrutModule struct {
-	Expressions []BrutList
-	Env map[string]BrutList
-}
-
-func NewBrutModule() BrutModule{
-	return BrutModule{Expressions: make([]BrutList,0)}
-}
-
-func (BrutModule) GetType() ObjectType{
-	return MODULE
-}
-
-func (bModule BrutModule) AppendExp(bList BrutList) BrutModule{
-	bModule.Expressions = append(bModule.Expressions, bList)
-	return bModule
-}
-
-func (bModule BrutModule) String() string{
-	return ""
-}
 
 /*
 * Numbers
 */
 
-type BrutNumber struct {
-	Value float64
-}
-
-func NewBrutNumber(num float64) BrutNumber{
-	return BrutNumber{Value:num}
-}
+type BrutNumber float64
 
 func (BrutNumber) GetType() ObjectType{
 	return NUMBER
 }
 
 func (bNumber BrutNumber) String() string{
-	return fmt.Sprintf("%v", bNumber.Value)
+	return fmt.Sprintf("%v", float64(bNumber))
 }
 
 /*
 * Symbols
 */
 
-type BrutSymbol struct {
-	sym string
-}
-
-func NewBrutSymbol(sym string) BrutSymbol{
-	return BrutSymbol{sym: sym}
-}
+type BrutSymbol string
 
 func (BrutSymbol) GetType() ObjectType{
 	return SYMBOL
 }
 
 func (bSym BrutSymbol) String() string{
-	return bSym.sym
+	return string(bSym)
 }
 
 
@@ -183,13 +130,7 @@ func (bSym BrutSymbol) String() string{
 * BrutPrimitive
 */
 
-type BrutPrimitive struct{
-	FN func(BrutList)BrutType
-}
-
-func NewBrutPrimitive(fn func(BrutList)BrutType)BrutPrimitive{
-	return BrutPrimitive{FN:fn}
-}
+type BrutPrimitive func(BrutList)BrutType
 
 func (BrutPrimitive) GetType() ObjectType{
 	return PRIMITIVE
@@ -225,11 +166,21 @@ func (e BrutEnv) LookUp(sym BrutSymbol)BrutType{
 	}
 }
 
-// func (e Env) Set(sym types.BrutSymbol, val types.BrutType) Env{
-// 	e.value[sym.String()] = val
-// 	return e
-// }
 
-// func (e Env) setPrimitives() Env{
-// 	return e
-// }
+/*
+* Stacks
+*/
+
+type BrutStack []BrutType
+
+func (st BrutStack) String() string {
+	result := ""
+	for _, obj := range st{
+		result += obj.String() + "\n"
+	}
+	return result
+}
+
+func (BrutStack) GetType()ObjectType{
+	return STACK
+}

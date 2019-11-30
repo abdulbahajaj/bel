@@ -112,7 +112,7 @@ func PrintExp(exp types.BrutList, intendation int){
 	indString := strings.Repeat("\t", intendation)
 	fmt.Println(indString + " ===============")
 	fmt.Println(indString + "Exp begin")
-	for _, el := range exp.Elements {
+	for _, el := range exp {
 		if el.GetType() == types.LIST {
 			PrintExp(el.(types.BrutList), intendation + 1)
 		} else {
@@ -121,18 +121,18 @@ func PrintExp(exp types.BrutList, intendation int){
 	}
 }
 
-func PrintModule(module types.BrutModule){
+func PrintModule(expStack types.BrutStack){
 	fmt.Println("===============")
 	fmt.Println("Module Begin")
-	for _,exp  := range module.Expressions{
-		PrintExp(exp, 1)
+	for _,exp  := range expStack{
+		PrintExp(exp.(types.BrutList), 1)
 	}
 }
 
 func readSymbol(allTokens []token) (types.BrutSymbol, []token, error){
 	current_token, remaining_tokens, _ := consume(allTokens)
 	allTokens = remaining_tokens
-	return types.NewBrutSymbol(current_token.val), allTokens, nil
+	return types.BrutSymbol(current_token.val), allTokens, nil
 }
 
 func readExp(allTokens []token)(types.BrutList, []token, error){
@@ -152,7 +152,7 @@ func readExp(allTokens []token)(types.BrutList, []token, error){
 			continue
 		} else {
 			allTokens = unConsume(current, allTokens)
-			result, remaining_tokens, err := Read(allTokens)
+			result, remaining_tokens, err := readRec(allTokens)
 			if err != nil {
 				return exp, []token{}, err
 			}
@@ -168,10 +168,10 @@ func readNum(allTokens []token) (types.BrutNumber, []token, error){
 	current_token, remaining_tokens, _ := consume(allTokens)
 	allTokens = remaining_tokens
 	i, _ := strconv.ParseFloat(current_token.val, 64)
-	return types.NewBrutNumber(i), allTokens, nil
+	return types.BrutNumber(i), allTokens, nil
 }
 
-func Read(allTokens []token)(types.BrutType, []token, error){
+func readRec(allTokens []token)(types.BrutType, []token, error){
 	current_token, remaining_tokens, err := consume(allTokens)
 
 	if err != nil {
@@ -189,25 +189,24 @@ func Read(allTokens []token)(types.BrutType, []token, error){
 		return readSymbol(allTokens)
 	} else if current_token.name == "NEW_LINE" {
 		_, remaining_tokens, _ = consume(allTokens)
-		return Read(remaining_tokens)
+		return readRec(remaining_tokens)
 	}
 
 	return types.BrutList{}, []token{}, errors.New(
 		"Unidentified expression: " + current_token.val + " " + current_token.name)
 }
 
-func ReadModule(in string) (types.BrutModule, error){
-	module := types.NewBrutModule()
+func Read(in string) (types.BrutStack, error){
+	expression_stack := make(types.BrutStack, 0)
 	allTokens := tokenize(in)
-	printAllTokens(allTokens)
 	for {
-		exp, remaining_tokens, err := Read(allTokens)
+		exp, remaining_tokens, err := readRec(allTokens)
 
 		if err != nil {
-			return module, err
+			return expression_stack, err
 		}
 
-		module = module.AppendExp(exp.(types.BrutList))
+		expression_stack = append(expression_stack, (exp.(types.BrutList)))
 
 		if len(remaining_tokens) == 0 {
 			break
@@ -215,5 +214,5 @@ func ReadModule(in string) (types.BrutModule, error){
 
 		allTokens = remaining_tokens
 	}
-	return module, nil
+	return expression_stack, nil
 }
