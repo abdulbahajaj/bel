@@ -160,24 +160,32 @@ symbols.
 
 Pairs are pairs of any two things, and are represented thus:
 
+#+BEGIN_SRC common-lisp
 (foo . bar)
+#+END_SRC
 
 That's a pair of two symbols, foo and bar, but the two halves of a
 pair can be anything, including pairs:
 
+#+BEGIN_SRC common-lisp
 (foo . (bar . baz))
+#+END_SRC
 
 That's a pair of the symbol foo, and the pair (bar . baz).
 
 A character is represented by prepending a backslash to its name. So
 the letter a is represented as
 
+#+BEGIN_SRC common-lisp
 \a
+#+END_SRC
 
 Characters that aren't letters may have longer names. For example the
 bell character, after which Bel is named, is
 
+#+BEGIN_SRC common-lisp
 \bel
+#+END_SRC
 
 There is no way of representing a stream. If Bel has to display a
 stream, it prints something that will cause an error if it's read
@@ -201,7 +209,9 @@ most fundamental way they're used is to make lists, as follows:
 
 Here's a list made from a pair:
 
+#+BEGIN_SRC common-lisp
 (a . nil)
+#+END_SRC
 
 According to rule 2, this is a list of the symbol a followed by the
 elements of nil, of which according to rule 1 there are none. So it
@@ -210,11 +220,15 @@ is a list of one element, the symbol a.
 By nesting such pairs we can create lists of any length. Here is a
 list of two elements, the symbols a and b:
 
+#+BEGIN_SRC common-lisp
 (a . (b . nil))
+#+END_SRC
 
 And here is a list of a, b, and c:
 
+#+BEGIN_SRC common-lisp
 (a . (b . (c . nil)))
+#+END_SRC
 
 This would be an awkward way to express lists, but there is an
 abbreviated notation that's more convenient:
@@ -227,11 +241,15 @@ abbreviated notation that's more convenient:
 
 By repeated application of these two rules we can transform
 
+#+BEGIN_SRC common-lisp
 (a . (b . (c . nil)))
+#+END_SRC
 
 into
 
+#+BEGIN_SRC common-lisp
 (a b c)
+#+END_SRC
 
 In other words, a list can be expressed as its elements within
 parentheses. You wouldn't use dot notation for a list like (a b c)
@@ -240,21 +258,31 @@ unless there was some special reason to.
 Because any object can be part of a pair, the elements of lists can
 themselves be lists. All these are lists too:
 
+#+BEGIN_SRC common-lisp
 (a (b) c)
+#+END_SRC
 
+#+BEGIN_SRC common-lisp
 ((a b c))
+#+END_SRC
 
+#+BEGIN_SRC common-lisp
 (nil)
+#+END_SRC
 
 Pairs like these, where if you keep looking at the second half you
 eventually hit a nil, are called proper lists. This is a proper
 list:
 
+#+BEGIN_SRC common-lisp
 (a b c)
+#+END_SRC
 
 and this is not:
 
+#+BEGIN_SRC common-lisp
 (a b . c)
+#+END_SRC
 
 The empty list is also a proper list.
 
@@ -264,11 +292,15 @@ you need to use dot notation to represent it).
 A proper list of characters is called a string, and can also be
 represented as those characters within double-quotes. So the list
 
+#+BEGIN_SRC common-lisp
 (\h \e \l \l \o)
+#+END_SRC
 
 can also be represented as
 
+#+BEGIN_SRC common-lisp
 "hello"
+#+END_SRC
 
 and will when possible be displayed that way.
 
@@ -294,7 +326,9 @@ and return one object.
 Functions are represented using lists. For example, here is a
 function that takes one argument, and returns that plus 1.
 
+#+BEGIN_SRC common-lisp
 (lit clo nil (x) (+ x 1))
+#+END_SRC
 
 The first element, lit, says that this is a literal object, not to be
 evaluated.
@@ -314,7 +348,9 @@ function returns.
 You would not ordinarily express a function using its literal
 representation. Usually you'd say
 
+#+BEGIN_SRC common-lisp
 (fn (x) (+ x 1))
+#+END_SRC
 
 which yields the function above.
 
@@ -337,7 +373,9 @@ When an expression is evaluated, there are three possible outcomes:
 Some expressions also do things in the process of being evaluated.
 For example,
 
+#+BEGIN_SRC common-lisp
 (prn 1)
+#+END_SRC
 
 will return 1, but before doing so will print it.
 
@@ -349,14 +387,18 @@ error if they don't have a value.
 A proper list whose first element evaluates to a function is called
 a function call. For example, the expression
 
+#+BEGIN_SRC common-lisp
 (+ x 1)
+#+END_SRC
 
 is a function call, because the value of + is a function. The value
 of a function call is the object that the function returns.
 
 Function calls are evaluated left to right. For example, when
 
+#+BEGIN_SRC common-lisp
 (+ 8 5)
+#+END_SRC
 
 is evaluated,
 
@@ -373,17 +415,23 @@ is evaluated,
 If we want to show what expressions evaluate to, it's conventional to
 show them being evaluated in a repl:
 
+#+BEGIN_SRC common-lisp
 > (+ 8 5)
 13
+#+END_SRC
 
 Expressions can be nested. The rule of evaluating left to right means
 that nested function calls are evaluated depth-first. For example,
 when
 
+#+BEGIN_SRC common-lisp
 (+ (- 5 2) 7)
+#+END_SRC
 
 is evaluated, the subexpressions that get evaluated are, in order,
+#+BEGIN_SRC common-lisp
 +, (- 5 2), -, 5, 2, 7.
+#+END_SRC
 
 Not all expressions are evaluated left to right, however. There is a
 small set of symbols called special forms, and an expression whose
@@ -392,7 +440,9 @@ defined for that special form.
 
 For example, if is a special form, and when an expression of the form
 
+#+BEGIN_SRC common-lisp
 (if test then else)
+#+END_SRC
 
 is evaluated, only one of the last two elements will be evaluated,
 depending on whether the second element, test, returns true or not.
@@ -414,7 +464,9 @@ the set of global bindings is called the global environment.
 Another way a variable can have a value is by being a parameter in a
 function. When the function
 
+#+BEGIN_SRC common-lisp
 (fn (x) (+ x 1))
+#+END_SRC
 
 is called, the variable x will, within it, have as its value whatever
 argument the function was called with. That's called a lexical
@@ -495,24 +547,32 @@ first because so many code examples use it.
 It returns its argument without evaluating it. Its purpose is to
 prevent evaluation.
 
+#+BEGIN_SRC common-lisp
 > (quote a)
 a
+#+END_SRC
 
 Prepending ' to an expression is equivalent to wrapping a quote
 around it.
 
+#+BEGIN_SRC common-lisp
 > 'a
 a
+#+END_SRC
 
 Why do you need to prevent evaluation? To distinguish between code
 and data. If you want to talk about the symbol a, you have to quote
 it. Otherwise it will be treated as a variable, and you'll get its
 value. E.g. if a has been set to 10:
 
+#+BEGIN_SRC common-lisp
 > a
 10
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > 'a
 a
+#+END_SRC
 
 Because the symbols nil, t, o, and apply evaluate to themselves, you
 don't have to quote them. Ditto for strings.
@@ -531,18 +591,24 @@ be signalled.
 
 Returns true iff x and y are identical.
 
+#+BEGIN_SRC common-lisp
 > (id 'a 'a)
 t
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (id 'a 'b)
 nil
+#+END_SRC
 
 Identity is stricter than equality. While there is only one of each
 symbol and character, there can be any number of different pairs with
 the same elements. So two pairs can look the same without being
 identical:
 
+#+BEGIN_SRC common-lisp
 > (id '(a b) '(a b))
 nil
+#+END_SRC
 
 Because id is so strict, it's not the function you'd usually use to
 test for equality. Usually you'd use =.
@@ -552,30 +618,42 @@ test for equality. Usually you'd use =.
 
 Returns a new pair whose first half is x and second half is y.
 
+#+BEGIN_SRC common-lisp
 > (join 'a 'b)
 (a . b)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (join 'a)
 (a)
+#+END_SRC
 
 A pair returned by join will not be id to any existing pair.
 
+#+BEGIN_SRC common-lisp
 > (id (join 'a 'b) (join 'a 'b))
 nil
+#+END_SRC
 
 
 3.  (car x)
 
 Returns the first half of a pair:
 
+#+BEGIN_SRC common-lisp
 > (car '(a . b))
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (car '(a b))
 a
+#+END_SRC
 
 The car of nil is nil,
 
+#+BEGIN_SRC common-lisp
 > (car nil)
 nil
+#+END_SRC
 
 but calling car on any atom other than nil will cause an error.
 
@@ -589,10 +667,14 @@ change it.
 
 Returns the second half of a pair:
 
+#+BEGIN_SRC common-lisp
 > (cdr '(a . b))
 b
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (cdr '(a b))
 (b)
+#+END_SRC
 
 As with car, calling it on nil yields nil, calling it on any other
 atom causes an error, and the name is McCarthy's.
@@ -606,12 +688,18 @@ the first element and the rest of the list respectively.
 Returns either symbol, pair, char, or stream depending on the type
 of x.
 
+#+BEGIN_SRC common-lisp
 > (type 'a)
 symbol
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (type '(a))
 pair
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (type \a)
 char
+#+END_SRC
 
 
 6.  (xar x y)
@@ -621,24 +709,36 @@ not a pair.
 
 If we assume that the value of x is (a . b), then
 
+#+BEGIN_SRC common-lisp
 > x
 (a . b)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (xar x 'c)
 c
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > x
 (c . b)
+#+END_SRC
 
 
 7.  (xdr x y)
 
 Like xar, except that it replaces the cdr of x.
 
+#+BEGIN_SRC common-lisp
 > x
 (c . b)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (xdr x 'd)
 d
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > x
 (c . d)
+#+END_SRC
 
 
 8.  (sym x)
@@ -646,8 +746,10 @@ d
 Returns the symbol whose name is the elements of x. Signals an error
 if x is not a string.
 
+#+BEGIN_SRC common-lisp
 > (sym "foo")
 foo
+#+END_SRC
 
 
 9.  (nom x)
@@ -655,8 +757,10 @@ foo
 Returns a fresh list of the characters in the name of x. Signals an
 error if x is not a symbol.
 
+#+BEGIN_SRC common-lisp
 > (nom 'foo)
 "foo"
+#+END_SRC
 
 
 10. (wrb x y)
@@ -720,10 +824,14 @@ Returns the whole lit expression without evaluating it. A lit is like
 a persistent quote; evaluation strips the quote off a quote
 expression, but leaves a lit expression intact.
 
+#+BEGIN_SRC common-lisp
 > (quote a)
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (lit a)
 (lit a)
+#+END_SRC
 
 The name stands for literal, and it can take any number of arguments.
 This is how you make things that evaluate to themselves, the way
@@ -732,15 +840,19 @@ numbers.
 
 The value of a primitive p is (lit prim p).
 
+#+BEGIN_SRC common-lisp
 > car
 (lit prim car)
+#+END_SRC
 
 
 3.  (if ...)
 
 An if expression with an odd number of arguments
 
+#+BEGIN_SRC common-lisp
 (if a1 a2 a3 a4 ... an)
+#+END_SRC
 
 is equivalent to
 
@@ -753,11 +865,15 @@ succeeding argument is evaluated and its value returned.
 
 An if expression with an even number of arguments
 
+#+BEGIN_SRC common-lisp
 (if a1 a2 ... an)
+#+END_SRC
 
 is equivalent to
 
+#+BEGIN_SRC common-lisp
 (if a1 a2 ... an nil)
+#+END_SRC
 
 Falsity is represented by nil, and truth by any other value. Tests
 generally return the symbol t when they can't return anything more
@@ -773,21 +889,31 @@ insist on 3 arguments.
 
 An expression of the form
 
+#+BEGIN_SRC common-lisp
 (apply f x y ... z)
+#+END_SRC
 
 is equivalent to
 
+#+BEGIN_SRC common-lisp
 (f 'a 'b ... 'c1 ... 'cn)
+#+END_SRC
 
 where a is the value of x, b the value of y, and the ci the elements
 of the value of z.
 
+#+BEGIN_SRC common-lisp
 > (join 'a 'b)
 (a . b)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (apply join '(a b))
 (a . b)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (apply join 'a '(b))
 (a . b)
+#+END_SRC
 
 The last argument to apply can be a dotted list if it matches the
 parameters of the first.
@@ -802,8 +928,10 @@ a pair.
 
 For example, if x is (a b c),
 
+#+BEGIN_SRC common-lisp
 > (where (cdr x))
 ((a b c) d)
+#+END_SRC
 
 
 6.  (dyn v x y)
@@ -813,12 +941,18 @@ dynamically bound to the value of x.
 
 For example, if x is a,
 
+#+BEGIN_SRC common-lisp
 > x
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > (dyn x 'z (join x 'b))
 (z . b)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > x
 a
+#+END_SRC
 
 
 7.  (after x y)
@@ -854,7 +988,9 @@ parallel with this guide.
 In the Bel source, when you see an expression of the form
 
 ** Set
+#+BEGIN_SRC common-lisp
 (set v1 e1 ... vn en)
+#+END_SRC
 
 it means each vi is globally bound to the value of ei.
 
@@ -863,19 +999,27 @@ I've made a handful of exceptions to make the code easier to read.
 
 When you see
 
+#+BEGIN_SRC common-lisp
 (def n p e)
+#+END_SRC
 
 treat it as an abbreviation for
 
+#+BEGIN_SRC common-lisp
 (set n (lit clo nil p e))
+#+END_SRC
 
 and when you see
 
+#+BEGIN_SRC common-lisp
 (mac n p e)
+#+END_SRC
 
 treat it as an abbreviation for
 
+#+BEGIN_SRC common-lisp
 (set n (lit mac (lit clo nil p e)))
+#+END_SRC
 
 The actual def and mac operators are more powerful, but this is as
 much as we need to start with.
@@ -884,11 +1028,15 @@ much as we need to start with.
 ** Function abbreviation
 Treat an expression in square brackets, e.g.
 
+#+BEGIN_SRC common-lisp
 [f _ x]
+#+END_SRC
 
 as an abbreviation for
 
+#+BEGIN_SRC common-lisp
 (fn (_) (f _ x))
+#+END_SRC
 
 In Bel, underscore is an ordinary character and _ is thus an ordinary
 variable.
@@ -899,12 +1047,18 @@ Finally, treat an expression with a prepended backquote (`) as a
 quoted list, but with "holes," marked by commas, where evaluation
 is turned back on again.
 
+#+BEGIN_SRC common-lisp
 > (set x 'a)
 a
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > `(x ,x y)
 (x a y)
+#+END_SRC
+#+BEGIN_SRC common-lisp
 > `(x ,x y ,(+ 1 2))
 (x a y 3)
+#+END_SRC
 
 You can also use ,@ to get a value spliced into the surrounding
 list:
