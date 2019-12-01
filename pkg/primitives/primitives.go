@@ -34,6 +34,7 @@ func id(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 }
 
 func prn(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+	fmt.Println("in prn")
 	for _, el := range l{
 		fmt.Print(el.String() + " ")
 	}

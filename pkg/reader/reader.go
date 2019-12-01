@@ -88,6 +88,7 @@ func tokenize(in string) []token{
 
 	allPatterns := []tokenPattern{
 		tokenPattern{ name: "NEW_LINE",  pattern: `\n` },
+		tokenPattern{ name: "QUOTE",  pattern: `'` },
 		tokenPattern{ name: "COMMENT",  pattern: `;`  },
 		tokenPattern{ name: "WHITE_SPACE",  pattern: ` `  },
 		tokenPattern{ name: "NUMBER",  pattern: `[+-]?([0-9]+(\.[0-9]*)?)`},
@@ -149,6 +150,16 @@ func PrintModule(expStack types.BrutStack){
 	for _,exp  := range expStack{
 		PrintExp(exp.(types.BrutList), 1)
 	}
+}
+
+func readQuote(allTokens []token) (types.BrutList, []token, error){
+	child, remainingTokens, err := readRec(allTokens[1:])
+	allTokens = remainingTokens
+
+	this := types.NewBrutList()
+	this = this.Append(types.BrutSymbol("quote"))
+	this = this.Append(child)
+	return this, allTokens, err
 }
 
 func readSymbol(allTokens []token) (types.BrutSymbol, []token, error){
@@ -216,8 +227,9 @@ func readRec(allTokens []token)(types.BrutType, []token, error){
 	} else if current_token.name == "NEW_LINE" {
 		_, remaining_tokens, _ = consume(allTokens)
 		return readRec(remaining_tokens)
+	} else if current_token.name == "QUOTE"{
+		return readQuote(allTokens)
 	}
-
 	return types.BrutList{}, []token{}, errors.New(
 		"Unidentified expression: " + current_token.val + " " + current_token.name)
 }

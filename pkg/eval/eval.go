@@ -2,7 +2,7 @@ package eval
 
 import (
 	"github.com/abdulbahajaj/brutus/pkg/types"
-	"fmt"
+	// "fmt"
 )
 
 
@@ -50,7 +50,6 @@ func invoke_func(fn_call types.BrutList, env types.BrutEnv) (types.BrutType, typ
 		// Getting closure local environment
 		// isGlobalEnv := false
 		var cloEnv types.BrutEnv
-		fmt.Println(cloEnvBType.GetType() == types.SYMBOL)
 
 		switch cloEnvBType.GetType(){
 			case types.NIL:
@@ -107,11 +106,7 @@ func evalSet(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEn
 	for cursor := 1; cursor < len(exp); cursor += 2{
 		val, newEnv := RecEval(exp[cursor + 1], env)
 		env = newEnv
-		fmt.Println("setting")
 
-		fmt.Println(exp[cursor].(types.BrutSymbol))
-		fmt.Println(val)
-		fmt.Println("end setting")
 		env = env.Set(exp[cursor].(types.BrutSymbol), val)
 	}
 	return types.BrutSymbol("t"), env
@@ -140,7 +135,7 @@ func RecEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.Bru
 		case "lit":
 			return bList, env
 		case "quote":
-			return bList[1:], env
+			return bList[1], env
 		case "set":
 			return evalSet(bList, env)
 		case "thread":
