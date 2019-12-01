@@ -19,20 +19,17 @@ func main() {
     panic(err)
   }
   program := string(dat)
-
+  fmt.Println(string(program[3]) == "\n")
   fmt.Println("Program:")
   fmt.Println(program)
+
   module, err := reader.Read(program)
   if err != nil{
     fmt.Println(err)
   }
 
-  // fmt.Println(len(module.Expressions))
-  // fmt.Println(module.Expressions)
-
   fmt.Println("Parsed:")
   reader.PrintModule(module)
-
 
   fmt.Println("Result: ")
   env := primitives.GetPrimitiveEnv()

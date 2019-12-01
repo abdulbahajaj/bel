@@ -40,16 +40,48 @@ func isAtom(bType types.BrutType) bool{
 	return true
 }
 
+func evalIf(bList types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+	for cursor := 1; cursor < len(bList); cursor += 2 {
+		// fmt.Println(bList[cursor].GetType())
+		if cursor == len(bList) - 1 {
+			return recEval(bList[cursor], env)
+		}
+
+		bType, newEnv := recEval(bList[cursor], env)
+		env = newEnv
+
+		if bType.GetType() != types.NIL{
+			return recEval(bList[cursor + 1], env)
+		}
+	}
+	return types.BrutNil(false), env
+}
+
 //An eval function that is recursively called
 func recEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.BrutEnv){
 	if bType.GetType() == types.SYMBOL{
 		return env.LookUp(bType.(types.BrutSymbol)), env
 	} else if isAtom(bType) {
 		return bType, env
-	} else {
-		// return types.NewBrutNumber(10)
-		return func_invoke(bType.(types.BrutList), env)
 	}
+
+	bList := bType.(types.BrutList)
+
+	if len(bList) == 0{
+		return types.BrutNil(false), env
+	}
+
+	// Evaluate special forms
+	first := bList[0]
+	if first.GetType() == types.SYMBOL{
+		switch first := bList[0].(types.BrutSymbol); first {
+		case "if":
+			return evalIf(bList, env)
+		}
+	}
+
+	//Default case - evaluate as functions
+	return func_invoke(bType.(types.BrutList), env)
 }
 
 //Sets up the environment and calls recEval

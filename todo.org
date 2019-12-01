@@ -4,17 +4,18 @@
 - [[#primitives][Primitives]]
 
 * TODO Special forms
-1. Literals
+1. If
+2. Literals
    1. Primitive
    2. Clojures
    3. Macros
-2. Import
-3. Appy
-4. where
-5. Dyn
-6. After
-7. ccc
-8. thread
+3. Import
+4. Appy
+5. where
+6. Dyn
+7. After
+8. ccc
+9. thread
 
 * TODO Primitives
 1. id

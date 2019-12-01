@@ -68,6 +68,7 @@ func (bList BrutList) String() string {
 
 /*
 * Tables
+* TODO Implement
 */
 
 type BrutTable map[BrutType]BrutType
@@ -183,4 +184,19 @@ func (st BrutStack) String() string {
 
 func (BrutStack) GetType()ObjectType{
 	return STACK
+}
+
+
+/*
+* NIL
+*/
+
+type BrutNil bool
+
+func (BrutNil) String() string {
+	return "NIL"
+}
+
+func (BrutNil) GetType()ObjectType{
+	return NIL
 }

@@ -64,15 +64,16 @@ func printAllTokens(allTokens []token){
 }
 
 func tokenize(in string) []token{
+
 	allPatterns := []tokenPattern{
+		tokenPattern{ name: "NEW_LINE",  pattern: `\n` },
 		tokenPattern{ name: "COMMENT",  pattern: `;`  },
 		tokenPattern{ name: "WHITE_SPACE",  pattern: ` `  },
 		tokenPattern{ name: "NUMBER",  pattern: `[+-]?([0-9]+(\.[0-9]*)?)`},
 		tokenPattern{ name: "OPEN_CIRCLE_BRACKET",   pattern: `\(` },
 		tokenPattern{ name: "CLOSE_CIRCLE_BRACKET",  pattern: `\)` },
 		tokenPattern{ name: "ESCAPED",  pattern: `(\\bel|\\.)` },
-		tokenPattern{ name: "NEW_LINE",  pattern: `\n` },
-		tokenPattern{ name: "SYMBOL",  pattern: `[^ ]*` },
+		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z]*` },
 		tokenPattern{ name: "OTHER",  pattern: `.` },
 	}
 
@@ -163,7 +164,6 @@ func readExp(allTokens []token)(types.BrutList, []token, error){
 	return exp, allTokens, nil
 }
 
-// TODO return the real number
 func readNum(allTokens []token) (types.BrutNumber, []token, error){
 	current_token, remaining_tokens, _ := consume(allTokens)
 	allTokens = remaining_tokens
@@ -199,6 +199,7 @@ func readRec(allTokens []token)(types.BrutType, []token, error){
 func Read(in string) (types.BrutStack, error){
 	expression_stack := make(types.BrutStack, 0)
 	allTokens := tokenize(in)
+	printAllTokens(allTokens)
 	for {
 		exp, remaining_tokens, err := readRec(allTokens)
 
