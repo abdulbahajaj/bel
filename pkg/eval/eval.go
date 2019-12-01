@@ -69,29 +69,6 @@ func invoke_func(fn_call types.BrutList, env types.BrutEnv) (types.BrutType, typ
 		cloEnv = cloEnv.ClearParams()
 
 		return returnVal, env
-
-
-		// var cloEnv types.BrutEnv
-		// isNewEnv := false
-		// if cloEnvBType.GetType() == types.ENV{
-		// 	localEnvEvaluated, newEnv := RecEval(clo[2], env)
-		// 	env = newEnv
-		// 	cloEnv = localEnvEvaluated.(types.BrutEnv)
-		// 	isNewEnv = true
-		// } else {
-		// 	cloEnv = types.NewBrutEnv()
-		// }
-		// if len(paramNames) != len(paramValues){
-		// 	panic("Wrong arity")
-		// }
-		// cloEnv = cloEnv.SetParams(paramNames, paramValues)
-
-		// returnVal, cloEnv := RecEval(body, cloEnv)
-		// cloEnv = cloEnv.ClearParams()
-		// if !isNewEnv{
-		// 	env = cloEnv
-		// }
-		// return returnVal, env
 	}
 }
 
@@ -165,8 +142,11 @@ func RecEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.Bru
 		case "quote":
 			return bList[1:], env
 		case "set":
-			fmt.Println("SET SPECIAL FORM")
 			return evalSet(bList, env)
+		case "thread":
+			// TODO there is an issue where threads don't have a reliable access to the global env
+			go RecEval(bList, env)
+			return types.BrutSymbol("t"), env
 		}
 	}
 
