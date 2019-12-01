@@ -126,6 +126,20 @@ func evalIf(bList types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutE
 	return types.BrutNil(false), env
 }
 
+func evalSet(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+	for cursor := 1; cursor < len(exp); cursor += 2{
+		val, newEnv := RecEval(exp[cursor + 1], env)
+		env = newEnv
+		fmt.Println("setting")
+
+		fmt.Println(exp[cursor].(types.BrutSymbol))
+		fmt.Println(val)
+		fmt.Println("end setting")
+		env = env.Set(exp[cursor].(types.BrutSymbol), val)
+	}
+	return types.BrutSymbol("t"), env
+}
+
 //An eval function that is recursively called
 func RecEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.BrutEnv){
 	if bType.GetType() == types.SYMBOL{
@@ -150,6 +164,9 @@ func RecEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.Bru
 			return bList, env
 		case "quote":
 			return bList[1:], env
+		case "set":
+			fmt.Println("SET SPECIAL FORM")
+			return evalSet(bList, env)
 		}
 	}
 

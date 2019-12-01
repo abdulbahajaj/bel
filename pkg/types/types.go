@@ -197,7 +197,6 @@ func (e BrutEnv) LookUp(sym BrutSymbol)BrutType{
 	if sym == "scope" {
 		return e
 	}
-	fmt.Println(e.param)
 	if val, ok := e.param[sym.String()]; ok {
 		return val
 	} else if val, ok := e.global[sym.String()]; ok {

@@ -45,6 +45,7 @@ func evaluate(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutE
 	return eval.RecEval(exp, env)
 }
 
+
 func GetPrimitiveEnv() types.BrutEnv{
 	env := types.NewBrutEnv()
 	env = env.Set(types.BrutSymbol("+"), types.BrutPrimitive(Sum))

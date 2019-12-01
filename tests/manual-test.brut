@@ -10,6 +10,6 @@
 ;; (prn (quote tera))
 ;; (prn scope)
 
+(set a 4)
 
-
-((lit clo scope () (+ 3 4)))
+((lit clo scope (i) (+ a i)) 33)
