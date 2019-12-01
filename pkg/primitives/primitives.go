@@ -1,7 +1,7 @@
 package primitives
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/abdulbahajaj/brutus/pkg/types"
 )
 
@@ -32,9 +32,17 @@ func id(l types.BrutList)types.BrutType{
 	return types.BrutSymbol("t")
 }
 
+func prn(l types.BrutList)types.BrutType{
+	for _, el := range l{
+		fmt.Print(el.String() + " ")
+	}
+	fmt.Print("\n")
+	return l
+}
 func GetPrimitiveEnv() types.BrutEnv{
 	env := types.NewBrutEnv()
 	env = env.Set(types.BrutSymbol("+"), types.BrutPrimitive(Sum))
+	env = env.Set(types.BrutSymbol("prn"), types.BrutPrimitive(prn))
 	env = env.Set(types.BrutSymbol("id"), types.BrutPrimitive(id))
 	return env
 }

@@ -77,6 +77,10 @@ func recEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.Bru
 		switch first := bList[0].(types.BrutSymbol); first {
 		case "if":
 			return evalIf(bList, env)
+		case "lit":
+			return bList, env
+		case "quote":
+			return bList[1:], env
 		}
 	}
 

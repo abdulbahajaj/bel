@@ -18,6 +18,7 @@ const (
 	LAMBDA
 	PRIMITIVE
 	STACK
+	ENV
 )
 
 type BrutAny interface {}
@@ -159,7 +160,22 @@ func (e BrutEnv) Set(sym BrutSymbol, val BrutType) BrutEnv{
 	return e
 }
 
+func (BrutEnv) GetType()ObjectType{
+	return ENV
+}
+
+func (e BrutEnv)String()string{
+	result := ""
+	for key, val := range e.value{
+		result += key + ": " + val.String() + "\n"
+	}
+	return result
+}
+
 func (e BrutEnv) LookUp(sym BrutSymbol)BrutType{
+	if sym == "scope" {
+		return e
+	}
 	if val, ok := e.value[sym.String()]; ok {
 		return val
 	} else {
