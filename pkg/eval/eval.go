@@ -2,6 +2,7 @@ package eval
 
 import (
 	"github.com/abdulbahajaj/brutus/pkg/types"
+	"fmt"
 )
 
 
@@ -9,24 +10,92 @@ import (
 * Function invocation
 */
 
-func func_invoke(fn_call types.BrutList, env types.BrutEnv) (types.BrutType, types.BrutEnv){
+func invoke_func(fn_call types.BrutList, env types.BrutEnv) (types.BrutType, types.BrutEnv){
 	evaluatedList := types.NewBrutList()
 	for _, val := range fn_call {
-		val, newEnv := recEval(val, env)
+		val, newEnv := RecEval(val, env)
 		env = newEnv
 		evaluatedList = evaluatedList.Append(val)
 	}
-	function := evaluatedList[0].(types.BrutPrimitive)
-	evaluatedList = evaluatedList[1:]
-	function.String()
-	// return types.NewBrutNumber(10)
-	return function(evaluatedList),env
+
+	first := evaluatedList[0]
+
+	if first.GetType() == types.PRIMITIVE{
+		function := first.(types.BrutPrimitive)
+		evaluatedList = evaluatedList[1:]
+		function.String()
+		return function(evaluatedList, env)
+	} else {
+		clo := first.(types.BrutList)
+		if clo[1].(types.BrutSymbol) != "clo"{
+			panic("Not callable")
+		}
+
+		// parsing closure
+		cloEnvBType := clo[2]
+		paramNames := clo[3].(types.BrutList)
+		body := clo[4]
+		paramValues := evaluatedList[1:]
+
+		if len(paramNames) != len(paramValues){
+			panic("Wrong arity")
+		}
+
+		if body.GetType() != types.LIST{
+			return body, env
+		} else {
+			body = body.(types.BrutList)
+		}
+
+		// Getting closure local environment
+		// isGlobalEnv := false
+		var cloEnv types.BrutEnv
+		fmt.Println(cloEnvBType.GetType() == types.SYMBOL)
+
+		switch cloEnvBType.GetType(){
+			case types.NIL:
+			cloEnv = types.NewBrutEnv()
+			case types.SYMBOL:
+			evaluated, newEnv := RecEval(cloEnvBType, env)
+			env = newEnv
+			cloEnv = evaluated.(types.BrutEnv)
+		}
+
+		// Setting closure parameters in env
+		cloEnv = cloEnv.SetParams(paramNames, paramValues)
+
+		//Running the expression
+		returnVal, cloEnv := RecEval(body, cloEnv)
+		cloEnv = cloEnv.ClearParams()
+
+		return returnVal, env
+
+
+		// var cloEnv types.BrutEnv
+		// isNewEnv := false
+		// if cloEnvBType.GetType() == types.ENV{
+		// 	localEnvEvaluated, newEnv := RecEval(clo[2], env)
+		// 	env = newEnv
+		// 	cloEnv = localEnvEvaluated.(types.BrutEnv)
+		// 	isNewEnv = true
+		// } else {
+		// 	cloEnv = types.NewBrutEnv()
+		// }
+		// if len(paramNames) != len(paramValues){
+		// 	panic("Wrong arity")
+		// }
+		// cloEnv = cloEnv.SetParams(paramNames, paramValues)
+
+		// returnVal, cloEnv := RecEval(body, cloEnv)
+		// cloEnv = cloEnv.ClearParams()
+		// if !isNewEnv{
+		// 	env = cloEnv
+		// }
+		// return returnVal, env
+	}
 }
 
 
-/*
-* Eval func
-*/
 
 func isAtom(bType types.BrutType) bool{
 	for _, objType := range []types.ObjectType{
@@ -44,21 +113,21 @@ func evalIf(bList types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutE
 	for cursor := 1; cursor < len(bList); cursor += 2 {
 		// fmt.Println(bList[cursor].GetType())
 		if cursor == len(bList) - 1 {
-			return recEval(bList[cursor], env)
+			return RecEval(bList[cursor], env)
 		}
 
-		bType, newEnv := recEval(bList[cursor], env)
+		bType, newEnv := RecEval(bList[cursor], env)
 		env = newEnv
 
 		if bType.GetType() != types.NIL{
-			return recEval(bList[cursor + 1], env)
+			return RecEval(bList[cursor + 1], env)
 		}
 	}
 	return types.BrutNil(false), env
 }
 
 //An eval function that is recursively called
-func recEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.BrutEnv){
+func RecEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.BrutEnv){
 	if bType.GetType() == types.SYMBOL{
 		return env.LookUp(bType.(types.BrutSymbol)), env
 	} else if isAtom(bType) {
@@ -85,19 +154,20 @@ func recEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.Bru
 	}
 
 	//Default case - evaluate as functions
-	return func_invoke(bType.(types.BrutList), env)
+	return invoke_func(bType.(types.BrutList), env)
 }
 
-//Sets up the environment and calls recEval
+//Sets up the environment and calls RecEval
 func Eval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.BrutEnv){
+	// env.Set(types.BrutSymbol("eval"), )
 	return_stack := types.NewBrutList()
 	if bType.GetType() == types.STACK {
 		for _, exp := range bType.(types.BrutStack) {
-			return_val, newEnv := recEval(exp, env)
+			return_val, newEnv := RecEval(exp, env)
 			env = newEnv
 			return_stack = return_stack.Append(return_val)
 		}
 		return return_stack, env
 	}
-	return recEval(bType, env)
+	return RecEval(bType, env)
 }

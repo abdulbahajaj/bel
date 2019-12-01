@@ -63,6 +63,27 @@ func printAllTokens(allTokens []token){
 	}
 }
 
+func removeComments(allTokens []token) []token{
+	newAllTokens := make([]token,0)
+	skip := false
+	for _, token := range allTokens{
+		if skip {
+			if token.name == "NEW_LINE"{
+				skip = false
+			}
+			continue
+		}
+
+		if token.name == "COMMENT" {
+			skip = true
+			continue
+		}
+
+		newAllTokens = append(newAllTokens, token)
+	}
+	return newAllTokens
+}
+
 func tokenize(in string) []token{
 
 	allPatterns := []tokenPattern{
@@ -86,7 +107,7 @@ func tokenize(in string) []token{
 		in = newIn
 		allTokens = append(allTokens, token)
 	}
-
+	allTokens = removeComments(allTokens)
 	return allTokens
 }
 
@@ -171,6 +192,7 @@ func readNum(allTokens []token) (types.BrutNumber, []token, error){
 	return types.BrutNumber(i), allTokens, nil
 }
 
+
 func readRec(allTokens []token)(types.BrutType, []token, error){
 	current_token, remaining_tokens, err := consume(allTokens)
 
@@ -186,7 +208,11 @@ func readRec(allTokens []token)(types.BrutType, []token, error){
 	} else if current_token.name == "NUMBER" {
 		return readNum(allTokens)
 	} else if current_token.name == "SYMBOL" {
-		return readSymbol(allTokens)
+		sym, allTokens, err := readSymbol(allTokens)
+		if sym == "nil"{
+			return types.BrutNil(false), allTokens, err
+		}
+		return sym, allTokens, err
 	} else if current_token.name == "NEW_LINE" {
 		_, remaining_tokens, _ = consume(allTokens)
 		return readRec(remaining_tokens)

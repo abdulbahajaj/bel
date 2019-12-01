@@ -132,14 +132,14 @@ func (bSym BrutSymbol) String() string{
 * BrutPrimitive
 */
 
-type BrutPrimitive func(BrutList)BrutType
+type BrutPrimitive func(BrutList, BrutEnv)(BrutType, BrutEnv)
 
 func (BrutPrimitive) GetType() ObjectType{
 	return PRIMITIVE
 }
 
 func (BrutPrimitive) String() string{
-	return "Primitive"
+	return "primitive"
 }
 
 
@@ -148,15 +148,33 @@ func (BrutPrimitive) String() string{
 */
 
 type BrutEnv struct{
-	value map[string]BrutType
+	global map[string]BrutType
+	param map[string]BrutType
 }
 
 func NewBrutEnv() BrutEnv{
-	return BrutEnv{value: make(map[string]BrutType)}
+	return BrutEnv{
+		global: make(map[string]BrutType),
+	}
+}
+
+func (e BrutEnv) SetParams(names BrutList, vals BrutList) BrutEnv{
+	e.param = make(map[string]BrutType)
+	for cursor := 0; cursor < len(names); cursor += 1{
+		key := string(names[cursor].(BrutSymbol))
+		val := vals[cursor]
+		e.param[key] = val
+	}
+	return e
+}
+
+func (e BrutEnv) ClearParams() BrutEnv{
+	e.param = map[string]BrutType{}
+	return e
 }
 
 func (e BrutEnv) Set(sym BrutSymbol, val BrutType) BrutEnv{
-	e.value[sym.String()] = val
+	e.global[sym.String()] = val
 	return e
 }
 
@@ -166,7 +184,10 @@ func (BrutEnv) GetType()ObjectType{
 
 func (e BrutEnv)String()string{
 	result := ""
-	for key, val := range e.value{
+	for key, val := range e.global{
+		result += key + ": " + val.String() + "\n"
+	}
+	for key, val := range e.param{
 		result += key + ": " + val.String() + "\n"
 	}
 	return result
@@ -176,7 +197,10 @@ func (e BrutEnv) LookUp(sym BrutSymbol)BrutType{
 	if sym == "scope" {
 		return e
 	}
-	if val, ok := e.value[sym.String()]; ok {
+	fmt.Println(e.param)
+	if val, ok := e.param[sym.String()]; ok {
+		return val
+	} else if val, ok := e.global[sym.String()]; ok {
 		return val
 	} else {
 		panic("Lookup failed: " + sym.String())
