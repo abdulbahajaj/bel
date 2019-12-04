@@ -97,7 +97,7 @@ func tokenize(in string) []token{
 		tokenPattern{ name: "OPEN_CIRCLE_BRACKET",   pattern: `\(` },
 		tokenPattern{ name: "CLOSE_CIRCLE_BRACKET",  pattern: `\)` },
 		tokenPattern{ name: "ESCAPED",  pattern: `(\\bel|\\.)` },
-		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z]*` },
+		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z,]*` },
 		tokenPattern{ name: "OTHER",  pattern: `.` },
 	}
 
@@ -171,8 +171,12 @@ func readQuote(allTokens []token) (types.BrutList, []token, error){
 
 func putBackTick(readStructure types.BrutType)(types.BrutType){
 	if common.IsAtom(readStructure){
-		fmt.Println("Putting quote")
-		fmt.Println(readStructure)
+		if readStructure.GetType() == types.SYMBOL{
+			sym := readStructure.(types.BrutSymbol)
+			if sym[0] == ','{
+				return sym[1:]
+			}
+		}
 		return PutQuote(readStructure)
 	} else {
 		exp := types.NewBrutList()
@@ -273,9 +277,6 @@ func Read(in string) (types.BrutStack, error){
 	for {
 		exp, remaining_tokens, err := readRec(allTokens)
 
-	fmt.Println(">>> stack")
-	fmt.Println(expression_stack)
-	fmt.Println(">>> stack")
 		if err != nil {
 			return expression_stack, err
 		}

@@ -6,7 +6,7 @@ import (
 	"github.com/abdulbahajaj/brutus/pkg/eval"
 )
 
-func Sum(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func sum(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 	var sum float64 = 0.0
 	for _, el := range l{
 		if el.GetType() == types.NUMBER{
@@ -51,7 +51,7 @@ func list(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 }
 func GetPrimitiveEnv() types.BrutEnv{
 	env := types.NewBrutEnv()
-	env = env.Set(types.BrutSymbol("+"), types.BrutPrimitive(Sum))
+	env = env.Set(types.BrutSymbol("+"), types.BrutPrimitive(sum))
 	env = env.Set(types.BrutSymbol("prn"), types.BrutPrimitive(prn))
 	env = env.Set(types.BrutSymbol("id"), types.BrutPrimitive(id))
 	env = env.Set(types.BrutSymbol("eval"), types.BrutPrimitive(evaluate))
