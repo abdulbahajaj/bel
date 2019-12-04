@@ -3,10 +3,11 @@ package reader
 import (
 	"fmt"
 	"regexp"
-	"github.com/abdulbahajaj/brutus/pkg/types"
 	"errors"
 	"strings"
 	"strconv"
+	"github.com/abdulbahajaj/brutus/pkg/types"
+	"github.com/abdulbahajaj/brutus/pkg/common"
 )
 
 
@@ -88,6 +89,7 @@ func tokenize(in string) []token{
 
 	allPatterns := []tokenPattern{
 		tokenPattern{ name: "NEW_LINE",  pattern: `\n` },
+		tokenPattern{ name: "BACKTICK",  pattern: `` + "`"},
 		tokenPattern{ name: "QUOTE",  pattern: `'` },
 		tokenPattern{ name: "COMMENT",  pattern: `;`  },
 		tokenPattern{ name: "WHITE_SPACE",  pattern: ` `  },
@@ -152,14 +154,41 @@ func PrintModule(expStack types.BrutStack){
 	}
 }
 
+func PutQuote(child types.BrutType) types.BrutList{
+	parent := types.NewBrutList()
+	parent = parent.Append(types.BrutSymbol("quote"))
+	parent = parent.Append(child)
+	return parent
+}
+
 func readQuote(allTokens []token) (types.BrutList, []token, error){
-	child, remainingTokens, err := readRec(allTokens[1:])
+	child, remainingTokens, err := readRec(allTokens)
 	allTokens = remainingTokens
 
-	this := types.NewBrutList()
-	this = this.Append(types.BrutSymbol("quote"))
-	this = this.Append(child)
+	this := PutQuote(child)
 	return this, allTokens, err
+}
+
+func putBackTick(readStructure types.BrutType)(types.BrutType){
+	if common.IsAtom(readStructure){
+		fmt.Println("Putting quote")
+		fmt.Println(readStructure)
+		return PutQuote(readStructure)
+	} else {
+		exp := types.NewBrutList()
+		exp = exp.Append(types.BrutSymbol("list"))
+		for _, el := range readStructure.(types.BrutList){
+			quotedStructure := putBackTick(el)
+			exp = exp.Append(quotedStructure)
+		}
+		return exp
+	}
+}
+
+func readBackTick(allTokens []token)(types.BrutType, []token, error){
+	readStructure, remaining_tokens, err := readRec(allTokens)
+	allTokens = remaining_tokens
+	return putBackTick(readStructure), allTokens, err
 }
 
 func readSymbol(allTokens []token) (types.BrutSymbol, []token, error){
@@ -170,8 +199,8 @@ func readSymbol(allTokens []token) (types.BrutSymbol, []token, error){
 
 func readExp(allTokens []token)(types.BrutList, []token, error){
 	exp := types.NewBrutList()
-	_, remaining_tokens, _ := consume(allTokens)
-	allTokens = remaining_tokens
+	// _, remaining_tokens, _ := consume(allTokens)
+	// allTokens = remaining_tokens
 	for {
 		current, remaining_tokens, err := consume(allTokens)
 		allTokens = remaining_tokens
@@ -203,32 +232,35 @@ func readNum(allTokens []token) (types.BrutNumber, []token, error){
 	return types.BrutNumber(i), allTokens, nil
 }
 
-
 func readRec(allTokens []token)(types.BrutType, []token, error){
 	current_token, remaining_tokens, err := consume(allTokens)
-
+	allTokens = remaining_tokens
 	if err != nil {
 		return types.BrutList{}, []token{}, err
 	}
-	allTokens = unConsume(current_token, remaining_tokens)
+	// allTokens = unConsume(current_token, remaining_tokens)
 
 	if current_token.name == "OPEN_CIRCLE_BRACKET" {
 		return readExp(allTokens)
 	} else if current_token.name == "CLOSE_CIRCLE_BRACKET" {
 		return types.BrutList{}, []token{}, errors.New("Unmatched )")
 	} else if current_token.name == "NUMBER" {
+		allTokens = unConsume(current_token, remaining_tokens)
 		return readNum(allTokens)
 	} else if current_token.name == "SYMBOL" {
+		allTokens = unConsume(current_token, remaining_tokens)
 		sym, allTokens, err := readSymbol(allTokens)
 		if sym == "nil"{
 			return types.BrutNil(false), allTokens, err
 		}
 		return sym, allTokens, err
 	} else if current_token.name == "NEW_LINE" {
-		_, remaining_tokens, _ = consume(allTokens)
+		// _, remaining_tokens, _ = consume(allTokens)
 		return readRec(remaining_tokens)
 	} else if current_token.name == "QUOTE"{
 		return readQuote(allTokens)
+	} else if current_token.name == "BACKTICK"{
+		return readBackTick(allTokens)
 	}
 	return types.BrutList{}, []token{}, errors.New(
 		"Unidentified expression: " + current_token.val + " " + current_token.name)
@@ -237,10 +269,13 @@ func readRec(allTokens []token)(types.BrutType, []token, error){
 func Read(in string) (types.BrutStack, error){
 	expression_stack := make(types.BrutStack, 0)
 	allTokens := tokenize(in)
-	printAllTokens(allTokens)
+	// printAllTokens(allTokens)
 	for {
 		exp, remaining_tokens, err := readRec(allTokens)
 
+	fmt.Println(">>> stack")
+	fmt.Println(expression_stack)
+	fmt.Println(">>> stack")
 		if err != nil {
 			return expression_stack, err
 		}
