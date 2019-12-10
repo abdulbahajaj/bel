@@ -34,7 +34,6 @@ func id(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 }
 
 func prn(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
-	fmt.Println("in prn")
 	for _, el := range l{
 		fmt.Print(el.String() + " ")
 	}
@@ -49,6 +48,18 @@ func evaluate(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutE
 func list(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 	return exp, env
 }
+
+func cons(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+
+	lastEl := exp[len(exp) -1].(types.BrutList)
+
+	for _, el := range exp[:len(exp)-2]{
+		lastEl = lastEl.Append(el)
+	}
+
+	return lastEl, env
+}
+
 func GetPrimitiveEnv() types.BrutEnv{
 	env := types.NewBrutEnv()
 	env = env.Set(types.BrutSymbol("+"), types.BrutPrimitive(sum))
@@ -56,5 +67,6 @@ func GetPrimitiveEnv() types.BrutEnv{
 	env = env.Set(types.BrutSymbol("id"), types.BrutPrimitive(id))
 	env = env.Set(types.BrutSymbol("eval"), types.BrutPrimitive(evaluate))
 	env = env.Set(types.BrutSymbol("list"), types.BrutPrimitive(list))
+	env = env.Set(types.BrutSymbol("cons"), types.BrutPrimitive(cons))
 	return env
 }

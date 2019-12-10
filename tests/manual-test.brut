@@ -14,6 +14,12 @@
 ;; ((lit clo scope (i) (+ 4 a)) 3)
 ;; (prn scope)
 
-(set ff 10)
+;; (set ff 10)
 
-`(a (b ,ff))
+(set ff 20)
+(set ff 40)
+(set ff33 550)
+(set f99 '(a b c d))
+
+;; (prn `(a (b ,ff)))
+(prn `(a ,@f99 ,ff33 b c ,ff))

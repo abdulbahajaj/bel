@@ -97,7 +97,7 @@ func tokenize(in string) []token{
 		tokenPattern{ name: "OPEN_CIRCLE_BRACKET",   pattern: `\(` },
 		tokenPattern{ name: "CLOSE_CIRCLE_BRACKET",  pattern: `\)` },
 		tokenPattern{ name: "ESCAPED",  pattern: `(\\bel|\\.)` },
-		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z,]*` },
+		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z,0-9@]*` },
 		tokenPattern{ name: "OTHER",  pattern: `.` },
 	}
 
@@ -154,7 +154,7 @@ func PrintModule(expStack types.BrutStack){
 	}
 }
 
-func PutQuote(child types.BrutType) types.BrutList{
+func putQuote(child types.BrutType) types.BrutList{
 	parent := types.NewBrutList()
 	parent = parent.Append(types.BrutSymbol("quote"))
 	parent = parent.Append(child)
@@ -165,30 +165,34 @@ func readQuote(allTokens []token) (types.BrutList, []token, error){
 	child, remainingTokens, err := readRec(allTokens)
 	allTokens = remainingTokens
 
-	this := PutQuote(child)
+	this := putQuote(child)
 	return this, allTokens, err
 }
 
-func putBackTick(readStructure types.BrutType)(types.BrutType){
-	if common.IsAtom(readStructure){
-		if readStructure.GetType() == types.SYMBOL{
-			sym := readStructure.(types.BrutSymbol)
-			if sym[0] == ','{
-				return sym[1:]
-			}
+func putBackTick(bType types.BrutType)(types.BrutType){
+	if common.IsAtom(bType){
+		if bType.GetType() != types.SYMBOL {
+			return putQuote(bType)
+		} else if sym := bType.(types.BrutSymbol); sym[0] == ','{
+			return sym[1:]
 		}
-		return PutQuote(readStructure)
+		return putQuote(bType)
 	} else {
 		exp := types.NewBrutList()
 		exp = exp.Append(types.BrutSymbol("list"))
-		for _, el := range readStructure.(types.BrutList){
-			quotedStructure := putBackTick(el)
-			exp = exp.Append(quotedStructure)
+		for _, el := range bType.(types.BrutList){
+			backTickedEl := putBackTick(el)
+			if backTickedEl.GetType() == types.SYMBOL {
+				sym := backTickedEl.(types.BrutSymbol)
+				if sym[0] == '@'{ // unwrap list
+
+				}
+			}
+			exp = exp.Append(backTickedEl)
 		}
 		return exp
 	}
 }
-
 func readBackTick(allTokens []token)(types.BrutType, []token, error){
 	readStructure, remaining_tokens, err := readRec(allTokens)
 	allTokens = remaining_tokens
