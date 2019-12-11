@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/abdulbahajaj/brutus/pkg/types"
 	"github.com/abdulbahajaj/brutus/pkg/eval"
+	"github.com/abdulbahajaj/brutus/pkg/common"
 )
 
 func sum(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
@@ -49,15 +50,31 @@ func list(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 	return exp, env
 }
 
+func append(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+	result := types.NewBrutList()
+	for _, el := range exp {
+		if common.IsAtom(el){
+			result = result.Append(el)
+		}else {
+			for _, el2 := range el.(types.BrutList){
+				result = result.Append(el2)
+			}
+		}
+	}
+	return result, env
+}
+
 func cons(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
-
 	lastEl := exp[len(exp) -1].(types.BrutList)
-
-	for _, el := range exp[:len(exp)-2]{
-		lastEl = lastEl.Append(el)
+	result := make(types.BrutList, 0, len(lastEl) + len(exp) - 1)
+	for _, el := range exp[:len(exp)-1]{
+		result = result.Append(el)
+	}
+	for _, el := range lastEl {
+		result = result.Append(el)
 	}
 
-	return lastEl, env
+	return result, env
 }
 
 func GetPrimitiveEnv() types.BrutEnv{
@@ -68,5 +85,6 @@ func GetPrimitiveEnv() types.BrutEnv{
 	env = env.Set(types.BrutSymbol("eval"), types.BrutPrimitive(evaluate))
 	env = env.Set(types.BrutSymbol("list"), types.BrutPrimitive(list))
 	env = env.Set(types.BrutSymbol("cons"), types.BrutPrimitive(cons))
+	env = env.Set(types.BrutSymbol("append"), types.BrutPrimitive(append))
 	return env
 }

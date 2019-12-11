@@ -169,6 +169,23 @@ func readQuote(allTokens []token) (types.BrutList, []token, error){
 	return this, allTokens, err
 }
 
+// Append back ticked el to a list
+func appendBTElement(exp types.BrutList, el types.BrutType) types.BrutList{
+	if el.GetType() == types.SYMBOL {
+		sym := el.(types.BrutSymbol)
+		if  sym[0] != '@'{
+			wrapper := types.NewBrutList()
+			wrapper = wrapper.Append(types.BrutSymbol("list"))
+			wrapper = wrapper.Append(el)
+			el = wrapper
+		} else {
+			el = sym[1:]
+		}
+	}
+	exp = exp.Append(el)
+	return exp
+}
+
 func putBackTick(bType types.BrutType)(types.BrutType){
 	if common.IsAtom(bType){
 		if bType.GetType() != types.SYMBOL {
@@ -179,20 +196,18 @@ func putBackTick(bType types.BrutType)(types.BrutType){
 		return putQuote(bType)
 	} else {
 		exp := types.NewBrutList()
-		exp = exp.Append(types.BrutSymbol("list"))
-		for _, el := range bType.(types.BrutList){
-			backTickedEl := putBackTick(el)
-			if backTickedEl.GetType() == types.SYMBOL {
-				sym := backTickedEl.(types.BrutSymbol)
-				if sym[0] == '@'{ // unwrap list
-
-				}
-			}
-			exp = exp.Append(backTickedEl)
+		exp = exp.Append(types.BrutSymbol("append"))
+		list := bType.(types.BrutList)
+		listLength := len(list)
+		for cursor := 0; cursor < listLength; cursor++{
+			el := list[cursor]
+			btEl := putBackTick(el)
+			exp = appendBTElement(exp, btEl)
 		}
 		return exp
 	}
 }
+
 func readBackTick(allTokens []token)(types.BrutType, []token, error){
 	readStructure, remaining_tokens, err := readRec(allTokens)
 	allTokens = remaining_tokens

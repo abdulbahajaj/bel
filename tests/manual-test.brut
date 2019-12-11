@@ -16,10 +16,11 @@
 
 ;; (set ff 10)
 
-(set ff 20)
-(set ff 40)
-(set ff33 550)
-(set f99 '(a b c d))
+(set a 20)
+(set a 40)
+(set b 550)
+(set c '(a b c d))
 
 ;; (prn `(a (b ,ff)))
-(prn `(a ,@f99 ,ff33 b c ,ff))
+(prn `(a ,a ,b b ,c c ,@c))
+;; (prn (append '(a 2 4 4 f) 3 2 '(s f ts) ))
