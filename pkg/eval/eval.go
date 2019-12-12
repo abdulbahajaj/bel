@@ -151,6 +151,31 @@ func seqEval(list types.BrutList, env types.BrutEnv) (types.BrutList, types.Brut
 	return evaluatedList, env
 }
 
+func setMac(def types.BrutList, env types.BrutEnv) (types.BrutEnv){
+	name := def[1].(types.BrutSymbol)
+	args := def[2]
+	body := def[3]
+
+	clo := types.NewBrutList()
+	clo = clo.Append(types.BrutSymbol("lit"))
+	clo = clo.Append(types.BrutSymbol("clo"))
+	clo = clo.Append(types.BrutSymbol("scope"))
+	clo = clo.Append(args)
+	clo = clo.Append(body)
+
+	mac := types.NewBrutList()
+	mac = mac.Append(types.BrutSymbol("lit"))
+	mac = mac.Append(types.BrutSymbol("mac"))
+	mac = mac.Append(clo)
+
+	env.Set(name, mac)
+
+// (mac nilwith (x)
+//   (list 'cons nil x))
+
+	return env
+}
+
 //An eval function that is recursively called
 func RecEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.BrutEnv){
 	if bType.GetType() == types.SYMBOL{
@@ -180,6 +205,9 @@ func RecEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.Bru
 		case "thread":
 			// TODO there is an issue where threads don't have a reliable access to the global env
 			go RecEval(bList, env)
+			return types.BrutSymbol("t"), env
+		case "mac":
+			env = setMac(bList, env)
 			return types.BrutSymbol("t"), env
 		}
 	}

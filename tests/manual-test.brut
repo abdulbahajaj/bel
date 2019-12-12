@@ -10,9 +10,9 @@
 ;; (prn (quote tera))
 ;; (prn scope)
 
-(set a 3)
+;; (set a 3)
 ;; ((lit clo scope (i) (+ i 4 a)) 55)
-((lit clo scope (i) i) 3)
+;; ((lit clo scope (i) i) 3)
 ;; (prn scope)
 
 ;; (set ff 10)
@@ -51,3 +51,10 @@
 ;; (prn 'test)
 ;; (set a 10)
 ;; (prn (cons a '()))
+
+(mac test (x)
+    `(+ 10 ,x))
+
+(set y 11)
+
+(test y)
