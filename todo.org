@@ -4,33 +4,26 @@
 - [[#primitives][Primitives]]
 
 * TODO Special forms
-1. If
-2. Literals
-   1. Primitive
-   2. Clojures
-   3. Macros
-3. Import
-4. Appy
-5. where
-6. Dyn
-7. After
-8. ccc
-9. thread
+1. Import
+2. Appy
+3. where
+4. Dyn
+5. After
+6. ccc
 
 * TODO Primitives
-1. id
-2. join
-3. car
-4. cdr
-5. type
-6. xar
-7. xdr
-8. sym
-9. nom
-10. wrb
-11. rdb
-12. ops
-13. cls
-14. stat
-15. coin
-16. sys
+1. join
+2. car
+3. cdr
+4. type
+5. xar
+6. xdr
+7. sym
+8. nom
+9. wrb
+10. rdb
+11. ops
+12. cls
+13. stat
+14. coin
+15. sys
