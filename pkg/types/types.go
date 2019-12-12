@@ -139,7 +139,7 @@ func (BrutPrimitive) GetType() ObjectType{
 }
 
 func (BrutPrimitive) String() string{
-	return "primitive"
+	return ""
 }
 
 

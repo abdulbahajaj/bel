@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strings"
 	"strconv"
+
 	"github.com/abdulbahajaj/brutus/pkg/types"
 	"github.com/abdulbahajaj/brutus/pkg/common"
 )
@@ -195,6 +196,7 @@ func appendBTElement(exp types.BrutList, el types.BrutType) types.BrutList{
 
 func putBackTick(bType types.BrutType)(types.BrutType){
 	if common.IsAtom(bType){
+		// TODO Why quote every non symbol atom?
 		if bType.GetType() != types.SYMBOL {
 			return putQuote(bType)
 		} else if sym := bType.(types.BrutSymbol); sym[0] == ','{

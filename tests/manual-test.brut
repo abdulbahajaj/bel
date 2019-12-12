@@ -10,17 +10,44 @@
 ;; (prn (quote tera))
 ;; (prn scope)
 
-;; (set a 1)
-;; ((lit clo scope (i) (+ 4 a)) 3)
+(set a 3)
+;; ((lit clo scope (i) (+ i 4 a)) 55)
+((lit clo scope (i) i) 3)
 ;; (prn scope)
 
 ;; (set ff 10)
 
-(set a 20)
-(set a 40)
-(set b 550)
-(set c '(a b c d))
+;; (set a 20)
+;; (set a 40)
+;; (set b 550)
+
+
+
+
+;; (set c '(a b c d))
 
 ;; (prn `(a (b ,ff)))
-(prn `(a ,a ,b b ,c c ,@c))
+;; (prn `(a ,a ,b '(a b ,c) b ,c c ,@c))
 ;; (prn (append '(a 2 4 4 f) 3 2 '(s f ts) ))
+
+;; (prn `(a (a ,b ,@c '(aa aa ,a))))
+
+
+
+;; (set b '(a b c d))
+
+;; (prn `(z ,@b ,b ,@a z))
+
+;; (prn "results")
+
+;; (set a 10)
+;; (set u '(q w t))
+;; (set d '(r t y))
+
+;; (prn 'expected)
+;; ;; (prn `(a b ,@u (c ,@d) ,a))
+;; (prn `(,@u ,a (c ,d ,@d d (,@d)) ,a))
+
+;; (prn 'test)
+;; (set a 10)
+;; (prn (cons a '()))
