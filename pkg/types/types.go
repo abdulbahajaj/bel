@@ -207,6 +207,17 @@ func (e BrutEnv) LookUp(sym BrutSymbol)BrutType{
 }
 
 
+func (dst BrutEnv) Copy(src BrutEnv) BrutEnv{
+	for key, val := range src.global {
+		dst.global[key] = val
+	}
+	for key, val := range src.param {
+		dst.param[key] = val
+	}
+	return dst
+}
+
+
 /*
 * Stacks
 */

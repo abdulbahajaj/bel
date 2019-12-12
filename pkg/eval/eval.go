@@ -40,7 +40,9 @@ func callClo(lit types.BrutList, args types.BrutList, env types.BrutEnv) (types.
 	returnVal, cloEnv := RecEval(body, cloEnv)
 
 	cloEnv = cloEnv.ClearParams()
-	//TODO override the variables from env with the ones from the cloEnv
+
+	env = env.Copy(cloEnv)
+
 	return returnVal, env
 }
 
