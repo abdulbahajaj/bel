@@ -85,10 +85,22 @@ func invokeCallable(call types.BrutList, env types.BrutEnv) (types.BrutType, typ
 		env = newEnv
 		return function(args, env)
 
+		case "mac":
+		clo := lit[2]
+		if clo.GetType() != types.LIST{
+			notCallablePanic(first.String())
+		}
+
+		args := call[1:]
+		expansion, env := callClo(clo.(types.BrutList), args, env)
+
+		return RecEval(expansion, env)
+
+		// (lit mac (lit clo nil p e))
+
 
 	}
 	panic("error")
-
 }
 
 
