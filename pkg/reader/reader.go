@@ -187,13 +187,6 @@ func putBTWrapper(el types.BrutType) types.BrutType {
 	return wrapper
 }
 
-func appendBTElement(exp types.BrutList, el types.BrutType) types.BrutList{
-	el = putBTWrapper(el)
-	exp = exp.Append(el)
-	return exp
-
-}
-
 func putBackTick(bType types.BrutType)(types.BrutType){
 	if common.IsAtom(bType){
 		// TODO Why quote every non symbol atom?
@@ -211,7 +204,9 @@ func putBackTick(bType types.BrutType)(types.BrutType){
 		for cursor := 0; cursor < listLength; cursor++{
 			el := list[cursor]
 			btEl := putBackTick(el)
-			exp = appendBTElement(exp, btEl)
+			wrappedBtEl := putBTWrapper(btEl)
+			exp = exp.Append(wrappedBtEl)
+
 		}
 		return exp
 	}

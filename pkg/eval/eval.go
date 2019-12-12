@@ -3,7 +3,6 @@ package eval
 import (
 	"github.com/abdulbahajaj/brutus/pkg/types"
 	"github.com/abdulbahajaj/brutus/pkg/common"
-	// "fmt"
 )
 
 
@@ -85,6 +84,8 @@ func invokeCallable(call types.BrutList, env types.BrutEnv) (types.BrutType, typ
 		args, newEnv := seqEval(call[1:], env)
 		env = newEnv
 		return function(args, env)
+
+
 	}
 	panic("error")
 
