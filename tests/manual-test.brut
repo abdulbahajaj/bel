@@ -52,9 +52,37 @@
 ;; (set a 10)
 ;; (prn (cons a '()))
 
-(mac test (x)
-    `(+ 10 ,x))
+;; ((lit clo ...) 1 2 34)
 
-(set y 11)
+(set mac
+    (lit mac
+        (lit clo scope (name args body)
+            `(set ,name
+                (lit mac
+                    (lit clo scope ,args ,body))))))
 
-(test y)
+(mac fn (args body)
+    `(lit clo scope ,args ,body))
+
+
+(mac def (name args body)
+    `(set ,name (fn ,args ,body)))
+
+
+;; (mac def (name args body))
+
+
+;; (def testing (a b)
+;;     (+ a b))
+
+;; (testing 1 2)
+
+;; (map (fn (x) (+ x 10)) '(1 2 3 4 5))
+
+(def rectest (start stop)
+  (if (id start stop) start
+      (rectest (+ start 1) stop)))
+
+;; (prn "START")
+(prn (rectest 1 100))
+;; (prn "STOP")

@@ -1,6 +1,7 @@
 package eval
 
 import (
+	// "fmt"
 	"github.com/abdulbahajaj/brutus/pkg/types"
 	"github.com/abdulbahajaj/brutus/pkg/common"
 )
@@ -14,11 +15,42 @@ func notCallablePanic(name string){
 	panic("Not callable: " + name)
 }
 
-func callClo(lit types.BrutList, args types.BrutList, env types.BrutEnv) (types.BrutType, types.BrutEnv){
-	paramNames := lit[3].(types.BrutList)
+func unwrapParams(params types.BrutList, args types.BrutList, env types.BrutEnv) types.BrutEnv{
+	// if len(params) != len(args){
+	// 	panic("Wrong arity")
+	// }
+
+	paramsLen := len(params)
+	argsLen := len(args)
+
+	for cursor := 0; cursor < paramsLen; cursor++ {
+
+		currentParam := params[cursor]
+
+		var currentArg types.BrutType
+		if cursor == paramsLen - 1 && argsLen > paramsLen {
+			currentArg = args[cursor:]
+		} else {
+			currentArg = args[cursor]
+		}
+
+		if common.IsAtom(currentParam) {
+			env = env.SetParam(currentParam.(types.BrutSymbol), currentArg)
+		} else if !common.IsAtom(currentParam) && !common.IsAtom(currentArg) {
+			env = unwrapParams(currentParam.(types.BrutList), currentArg.(types.BrutList), env)
+		} else {
+			panic("args don't match params")
+		}
+	}
+	// fmt.Println(env)
+	return env
+}
+
+func callClo(lit types.BrutList, args types.BrutList, env types.BrutEnv, evalArgs bool) (types.BrutType, types.BrutEnv){
+	params := lit[3].(types.BrutList)
 	body := lit[4]
 
-	if len(paramNames) != len(args){
+	if len(params) != len(args){
 		panic("Wrong arity")
 	}
 
@@ -34,7 +66,9 @@ func callClo(lit types.BrutList, args types.BrutList, env types.BrutEnv) (types.
 		cloEnv = evaluated.(types.BrutEnv)
 	}
 
-	cloEnv = cloEnv.SetParams(paramNames, args)
+	cloEnv = cloEnv.InitParams()
+	// cloEnv = cloEnv.SetParams(params, args)
+	cloEnv = unwrapParams(params, args, cloEnv)
 
 	returnVal, cloEnv := RecEval(body, cloEnv)
 
@@ -73,7 +107,7 @@ func invokeCallable(call types.BrutList, env types.BrutEnv) (types.BrutType, typ
 		case "clo":
 		args, newEnv := seqEval(call[1:], env)
 		env = newEnv
-		return callClo(lit, args, env)
+		return callClo(lit, args, env, true)
 
 		case "prim":
 		tempFunc := lit[3]
@@ -90,17 +124,16 @@ func invokeCallable(call types.BrutList, env types.BrutEnv) (types.BrutType, typ
 		if clo.GetType() != types.LIST{
 			notCallablePanic(first.String())
 		}
-
 		args := call[1:]
-		expansion, env := callClo(clo.(types.BrutList), args, env)
-
+		// fmt.Println("I am here")
+		expansion, env := callClo(clo.(types.BrutList), args, env, false)
+		// fmt.Println("Expansion:")
+		// fmt.Println(expansion)
+		// fmt.Println("End Expansion:")
 		return RecEval(expansion, env)
 
-		// (lit mac (lit clo nil p e))
-
-
 	}
-	panic("error")
+	panic("Unrecognized callable")
 }
 
 
@@ -139,6 +172,16 @@ func evalSet(exp types.BrutList, env types.BrutEnv) (types.BrutType, types.BrutE
 /*
 * Evaluation
 */
+
+func evalParams(env types.BrutEnv) types.BrutType{
+	params := env.GetParams()
+	for key, val := range params{
+		eVal, newEnv := RecEval(val, env)
+		env = newEnv
+		env = env.SetParam(types.BrutSymbol(key), eVal)
+	}
+	return env
+}
 
 //Sequentially evaluate elements in a list
 func seqEval(list types.BrutList, env types.BrutEnv) (types.BrutList, types.BrutEnv){
@@ -206,9 +249,9 @@ func RecEval(bType types.BrutType, env types.BrutEnv) (types.BrutType, types.Bru
 			// TODO there is an issue where threads don't have a reliable access to the global env
 			go RecEval(bList, env)
 			return types.BrutSymbol("t"), env
-		case "mac":
-			env = setMac(bList, env)
-			return types.BrutSymbol("t"), env
+		// case "mac":
+		// 	env = setMac(bList, env)
+		// 	return types.BrutSymbol("t"), env
 		}
 	}
 

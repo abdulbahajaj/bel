@@ -158,8 +158,26 @@ func NewBrutEnv() BrutEnv{
 	}
 }
 
-func (e BrutEnv) SetParams(names BrutList, vals BrutList) BrutEnv{
+func (e BrutEnv) SetParam(key BrutSymbol, val BrutType) BrutEnv{
+	// fmt.Println("setting: ")
+	// fmt.Println(key)
+	// fmt.Println(val)
+	// fmt.Println("end setting")
+	e.param[string(key)] = val
+	return e
+}
+
+func (e BrutEnv) GetParams() map[string]BrutType{
+	return e.param
+}
+
+func (e BrutEnv) InitParams() BrutEnv{
 	e.param = make(map[string]BrutType)
+	return e
+}
+
+func (e BrutEnv) SetParams(names BrutList, vals BrutList) BrutEnv{
+	e = e.InitParams()
 	for cursor := 0; cursor < len(names); cursor += 1{
 		key := string(names[cursor].(BrutSymbol))
 		val := vals[cursor]

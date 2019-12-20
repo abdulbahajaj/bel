@@ -88,6 +88,22 @@ func setPrimitive(name string, env types.BrutEnv, fn func(exp types.BrutList, en
 	return env
 }
 
+
+func bmap(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+	f := l[0]
+	toIterateOver := l[1].(types.BrutList)
+	results := types.NewBrutList()
+	for _, el := range toIterateOver{
+		call := types.NewBrutList()
+		call = call.Append(f)
+		call = call.Append(el)
+		callRes, newEnv := eval.RecEval(call, env)
+		env = newEnv
+		results = results.Append(callRes)
+	}
+	return results, env
+}
+
 func GetPrimitiveEnv() types.BrutEnv{
 	env := types.NewBrutEnv()
 
@@ -98,13 +114,6 @@ func GetPrimitiveEnv() types.BrutEnv{
 	env = setPrimitive("list", env, list)
 	env = setPrimitive("cons", env, cons)
 	env = setPrimitive("append", env, append)
-
-	// env = env.Set(types.BrutSymbol("+"), types.BrutPrimitive(sum))
-	// env = env.Set(types.BrutSymbol("prn"), types.BrutPrimitive(prn))
-	// env = env.Set(types.BrutSymbol("id"), types.BrutPrimitive(id))
-	// env = env.Set(types.BrutSymbol("eval"), types.BrutPrimitive(evaluate))
-	// env = env.Set(types.BrutSymbol("list"), types.BrutPrimitive(list))
-	// env = env.Set(types.BrutSymbol("cons"), types.BrutPrimitive(cons))
-	// env = env.Set(types.BrutSymbol("append"), types.BrutPrimitive(append))
+	env = setPrimitive("map", env, bmap)
 	return env
 }

@@ -20,22 +20,22 @@ func main() {
     panic(err)
   }
   program := string(dat)
-  fmt.Println(string(program[3]) == "\n")
-  fmt.Println("Program:")
-  fmt.Println(program)
+  // fmt.Println(string(program[3]) == "\n")
+  // fmt.Println("Program:")
+  // fmt.Println(program)
 
   module, err := reader.Read(program)
   if err != nil{
     fmt.Println(err)
   }
 
-  fmt.Println(">Parsed:")
-  reader.PrintModule(module)
+  // fmt.Println(">Parsed:")
+  // reader.PrintModule(module)
 
 
-  fmt.Println(">Started eval: ")
+  // fmt.Println(">Started eval: ")
   env := primitives.GetPrimitiveEnv()
-  return_stack, _ := eval.Eval(module, env)
-  fmt.Println(">Result: ")
-  fmt.Println(return_stack)
+  eval.Eval(module, env)
+  // fmt.Println(">Result: ")
+  // fmt.Println(return_stack)
 }
