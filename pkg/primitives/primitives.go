@@ -102,10 +102,35 @@ func bmap(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	return results, env
 }
 
+func length(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	el := l[0]
+	if el.GetType() != types.LIST {
+		return types.BrutNumber(1), env
+	}
+	return types.BrutNumber(len(el.(types.BrutList))), env
+}
+
+func biggerThan(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	if l[0].(types.BrutNumber) > l[1].(types.BrutNumber) {
+		return types.BrutSymbol("t"), env
+	}
+	return types.NewBrutList(), env
+}
+
+func smallerThan(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	if l[0].(types.BrutNumber) < l[1].(types.BrutNumber) {
+		return types.BrutSymbol("t"), env
+	}
+	return types.NewBrutList(), env
+}
+
 func GetPrimitiveEnv() *types.BrutEnv{
 	env := types.NewBrutEnv()
 	env.MakeGlobal()
 
+	setPrimitive(">", env, biggerThan)
+	setPrimitive("<", env, smallerThan)
+	setPrimitive("len", env, length)
 	setPrimitive("+", env, sum)
 	setPrimitive("prn", env, prn)
 	setPrimitive("id", env, id)

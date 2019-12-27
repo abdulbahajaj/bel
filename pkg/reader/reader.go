@@ -98,7 +98,7 @@ func tokenize(in string) []token{
 		tokenPattern{ name: "OPEN_CIRCLE_BRACKET",   pattern: `\(` },
 		tokenPattern{ name: "CLOSE_CIRCLE_BRACKET",  pattern: `\)` },
 		tokenPattern{ name: "ESCAPED",  pattern: `(\\bel|\\.)` },
-		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z,0-9@]*` },
+		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z,0-9@><]*` },
 		tokenPattern{ name: "OTHER",  pattern: `.` },
 	}
 

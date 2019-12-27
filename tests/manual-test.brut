@@ -5,17 +5,29 @@
                 (lit mac
                     (lit clo scope ,args ,body))))))
 
+
 (mac fn (args body)
-    `(lit clo ,scope ,args ,body))
+     (if (> (len body) 1) `(lit clo ,scope ,args (do ,@body))
+        `(lit clo ,scope ,args ,body)))
+
+;; (mac fn (args body)
+;;      `(lit clo ,scope ,args (do ,@body)))
 
 (mac def (name args body)
     `(set ,name (fn ,args ,body)))
 
-(def add-one (a) (fn () a))
+(def add-one (a)
+  (prn a)
+  (fn () a))
 
-(set x (add-one 1010))
 
-(prn x)
+(def my-test () (prn 2010) (prn 2121))
+(prn (my-test))
 
-(prn (x))
+(def my-test2 () (prn 2021))
+(def my-test3 () 1)
 
+(prn (my-test2))
+(prn (my-test3))
+;; (prn (my-test))
+;; (prn (if (> (len 1 ) 1) 10 20))

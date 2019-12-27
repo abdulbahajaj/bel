@@ -1,7 +1,7 @@
 package eval
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/abdulbahajaj/brutus/pkg/types"
 	"github.com/abdulbahajaj/brutus/pkg/common"
 )
@@ -39,9 +39,9 @@ func callClo(lit types.BrutList, args types.BrutList, env *types.BrutEnv, evalAr
 	params := lit[3].(types.BrutList)
 	body := lit[4]
 
-	if len(params) != len(args){
-		panic("Wrong arity")
-	}
+	// if len(params) != len(args){
+	// 	panic("Wrong arity")
+	// }
 
 	var cloEnv *types.BrutEnv
 	switch envDesc.GetType(){
@@ -77,6 +77,7 @@ func invokeCallable(call types.BrutList, env *types.BrutEnv) (types.BrutType, *t
 
 	lit := envFirst.(types.BrutList)
 	if len(lit) < 3 {
+		fmt.Println("LIT IS " + lit.String())
 		notCallablePanic(first.String())
 	}
 
