@@ -1,59 +1,3 @@
-;; (+ 1 2)
-;; (if
-;;     (id 2 3) (+ 3 1)
-;;     (id 3 33) (+ 3 11)
-;;     (+ 10 2))
-
-;; (+ 3 2 3)
-
-;; (prn (quote tera tera))
-;; (prn (quote tera))
-;; (prn scope)
-
-;; (set a 3)
-;; ((lit clo scope (i) (+ i 4 a)) 55)
-;; ((lit clo scope (i) i) 3)
-;; (prn scope)
-
-;; (set ff 10)
-
-;; (set a 20)
-;; (set a 40)
-;; (set b 550)
-
-
-
-
-;; (set c '(a b c d))
-
-;; (prn `(a (b ,ff)))
-;; (prn `(a ,a ,b '(a b ,c) b ,c c ,@c))
-;; (prn (append '(a 2 4 4 f) 3 2 '(s f ts) ))
-
-;; (prn `(a (a ,b ,@c '(aa aa ,a))))
-
-
-
-;; (set b '(a b c d))
-
-;; (prn `(z ,@b ,b ,@a z))
-
-;; (prn "results")
-
-;; (set a 10)
-;; (set u '(q w t))
-;; (set d '(r t y))
-
-;; (prn 'expected)
-;; ;; (prn `(a b ,@u (c ,@d) ,a))
-;; (prn `(,@u ,a (c ,d ,@d d (,@d)) ,a))
-
-;; (prn 'test)
-;; (set a 10)
-;; (prn (cons a '()))
-
-;; ((lit clo ...) 1 2 34)
-
 (set mac
     (lit mac
         (lit clo scope (name args body)
@@ -62,27 +6,16 @@
                     (lit clo scope ,args ,body))))))
 
 (mac fn (args body)
-    `(lit clo scope ,args ,body))
-
+    `(lit clo ,scope ,args ,body))
 
 (mac def (name args body)
     `(set ,name (fn ,args ,body)))
 
+(def add-one (a) (fn () a))
 
-;; (mac def (name args body))
+(set x (add-one 1010))
 
+(prn x)
 
-;; (def testing (a b)
-;;     (+ a b))
+(prn (x))
 
-;; (testing 1 2)
-
-;; (map (fn (x) (+ x 10)) '(1 2 3 4 5))
-
-(def rectest (start stop)
-  (if (id start stop) start
-      (rectest (+ start 1) stop)))
-
-;; (prn "START")
-(prn (rectest 1 100))
-;; (prn "STOP")

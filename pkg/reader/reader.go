@@ -117,12 +117,12 @@ func tokenize(in string) []token{
 
 
 /*
-* Reader
+* Reader helpers
 */
 
 func consume(in []token) (token, []token, error){
 	if len(in) == 0 {
-		return token{}, []token{}, errors.New("Empty token list")
+		return token{}, []token{}, errors.New("EmptyTokenList")
 	} else if len(in) == 1 {
 		return in[0], []token{}, nil
 	}
@@ -147,7 +147,7 @@ func PrintExp(exp types.BrutList, intendation int){
 	}
 }
 
-func PrintModule(expStack types.BrutStack){
+func PrintModule(expStack types.BrutList){
 	fmt.Println("===============")
 	fmt.Println("Module Begin")
 	for _,exp  := range expStack{
@@ -170,7 +170,9 @@ func readQuote(allTokens []token) (types.BrutList, []token, error){
 	return this, allTokens, err
 }
 
-// Append back ticked el to a list
+/*
+* Back tick
+*/
 
 func putBTWrapper(el types.BrutType) types.BrutType {
 
@@ -217,6 +219,10 @@ func readBackTick(allTokens []token)(types.BrutType, []token, error){
 	allTokens = remaining_tokens
 	return putBackTick(readStructure), allTokens, err
 }
+
+/*
+* Reader
+*/
 
 func readSymbol(allTokens []token) (types.BrutSymbol, []token, error){
 	current_token, remaining_tokens, _ := consume(allTokens)
@@ -278,11 +284,10 @@ func readRec(allTokens []token)(types.BrutType, []token, error){
 		allTokens = unConsume(current_token, remaining_tokens)
 		sym, allTokens, err := readSymbol(allTokens)
 		if sym == "nil"{
-			return types.BrutNil(false), allTokens, err
+			return types.NewBrutList(), allTokens, err
 		}
 		return sym, allTokens, err
-	} else if current_token.name == "NEW_LINE" {
-		// _, remaining_tokens, _ = consume(allTokens)
+	} else if current_token.name == "NEW_LINE" || current_token.name == "WHITE_SPACE"{
 		return readRec(remaining_tokens)
 	} else if current_token.name == "QUOTE"{
 		return readQuote(allTokens)
@@ -293,10 +298,9 @@ func readRec(allTokens []token)(types.BrutType, []token, error){
 		"Unidentified expression: " + current_token.val + " " + current_token.name)
 }
 
-func Read(in string) (types.BrutStack, error){
-	expression_stack := make(types.BrutStack, 0)
+func Read(in string) (types.BrutList, error){
+	expression_stack := types.NewBrutList()  //make(types.BrutStack, 0)
 	allTokens := tokenize(in)
-	// printAllTokens(allTokens)
 	for {
 		exp, remaining_tokens, err := readRec(allTokens)
 

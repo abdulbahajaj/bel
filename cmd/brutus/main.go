@@ -2,7 +2,8 @@ package main
 
 import (
   "io/ioutil"
-  "fmt"
+  // "fmt"
+  "log"
   "os"
 
   "github.com/abdulbahajaj/brutus/pkg/reader"
@@ -26,7 +27,10 @@ func main() {
 
   module, err := reader.Read(program)
   if err != nil{
-    fmt.Println(err)
+    if err.Error() != "EmptyTokenList"{
+      log.Fatal(err)
+      return
+    }
   }
 
   // fmt.Println(">Parsed:")

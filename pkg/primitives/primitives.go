@@ -7,7 +7,7 @@ import (
 	"github.com/abdulbahajaj/brutus/pkg/common"
 )
 
-func sum(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func sum(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	var sum float64 = 0.0
 	for _, el := range l{
 		if el.GetType() == types.NUMBER{
@@ -17,24 +17,24 @@ func sum(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 	return types.BrutNumber(sum), env
 }
 
-func id(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func id(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	first := l[0]
 	for _, el := range l[1:]{
 		if el.GetType() != first.GetType(){
-			return types.BrutNil(false), env
+			return types.NewBrutList(), env
 		}
 		if el.GetType() == types.LIST {
 			if &el != &first {
-				return types.BrutNil(false), env
+				return types.NewBrutList(), env
 			}
 		} else if el != first {
-			return types.BrutNil(false), env
+			return types.NewBrutList(), env
 		}
 	}
 	return types.BrutSymbol("t"), env
 }
 
-func prn(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func prn(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	for _, el := range l{
 		fmt.Print(el.String() + " ")
 	}
@@ -42,20 +42,20 @@ func prn(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 	return l, env
 }
 
-func evaluate(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func evaluate(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	return eval.RecEval(exp, env)
 }
 
-func list(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func list(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	return exp, env
 }
 
-func append(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func append(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	result := types.NewBrutList()
 	for _, el := range exp {
 		if common.IsAtom(el){
 			result = result.Append(el)
-		}else {
+		} else {
 			for _, el2 := range el.(types.BrutList){
 				result = result.Append(el2)
 			}
@@ -64,7 +64,7 @@ func append(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv
 	return result, env
 }
 
-func cons(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func cons(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	lastEl := exp[len(exp) -1].(types.BrutList)
 	result := make(types.BrutList, 0, len(lastEl) + len(exp) - 1)
 	for _, el := range exp[:len(exp)-1]{
@@ -77,19 +77,17 @@ func cons(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 	return result, env
 }
 
-func setPrimitive(name string, env types.BrutEnv, fn func(exp types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv))types.BrutEnv{
+func setPrimitive(name string, env *types.BrutEnv, fn func(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv)){
 	lit := types.NewBrutList()
 	lit = lit.Append(types.BrutSymbol("lit"))
 	lit = lit.Append(types.BrutSymbol("prim"))
 	lit = lit.Append(types.BrutSymbol(name))
 	lit = lit.Append(types.BrutPrimitive(fn))
 
-	env = env.Set(types.BrutSymbol(name), lit)
-	return env
+	env.Set(types.BrutSymbol(name), lit)
 }
 
-
-func bmap(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
+func bmap(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	f := l[0]
 	toIterateOver := l[1].(types.BrutList)
 	results := types.NewBrutList()
@@ -104,16 +102,17 @@ func bmap(l types.BrutList, env types.BrutEnv)(types.BrutType, types.BrutEnv){
 	return results, env
 }
 
-func GetPrimitiveEnv() types.BrutEnv{
+func GetPrimitiveEnv() *types.BrutEnv{
 	env := types.NewBrutEnv()
+	env.MakeGlobal()
 
-	env = setPrimitive("+", env, sum)
-	env = setPrimitive("prn", env, prn)
-	env = setPrimitive("id", env, id)
-	env = setPrimitive("eval", env, evaluate)
-	env = setPrimitive("list", env, list)
-	env = setPrimitive("cons", env, cons)
-	env = setPrimitive("append", env, append)
-	env = setPrimitive("map", env, bmap)
+	setPrimitive("+", env, sum)
+	setPrimitive("prn", env, prn)
+	setPrimitive("id", env, id)
+	setPrimitive("eval", env, evaluate)
+	setPrimitive("list", env, list)
+	setPrimitive("cons", env, cons)
+	setPrimitive("append", env, append)
+	setPrimitive("map", env, bmap)
 	return env
 }

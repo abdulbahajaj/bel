@@ -8,4 +8,4 @@ run:
 
 .PHONY: test
 test:
-	go test pkg/tokenizer/tokenizer_test.go
+	go run cmd/test/main.go
