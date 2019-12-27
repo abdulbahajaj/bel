@@ -1,7 +1,6 @@
 package eval
 
 import (
-	"fmt"
 	"github.com/abdulbahajaj/brutus/pkg/types"
 	"github.com/abdulbahajaj/brutus/pkg/common"
 )
@@ -77,7 +76,6 @@ func invokeCallable(call types.BrutList, env *types.BrutEnv) (types.BrutType, *t
 
 	lit := envFirst.(types.BrutList)
 	if len(lit) < 3 {
-		fmt.Println("LIT IS " + lit.String())
 		notCallablePanic(first.String())
 	}
 
