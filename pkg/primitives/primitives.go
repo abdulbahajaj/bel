@@ -124,6 +124,22 @@ func smallerThan(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.Br
 	return types.NewBrutList(), env
 }
 
+func first(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	li := l[0].(types.BrutList)
+	return li[0], env
+}
+
+func second(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	li := l[0].(types.BrutList)
+	return li[0], env
+}
+
+func nth(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	li := l[0].(types.BrutList)
+	index := li[1].(types.BrutNumber)
+	return  li[int(index)], env
+}
+
 func GetPrimitiveEnv() *types.BrutEnv{
 	env := types.NewBrutEnv()
 	env.MakeGlobal()

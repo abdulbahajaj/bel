@@ -7,8 +7,7 @@
 
 
 (mac fn (args body)
-     (if (> (len body) 1) `(lit clo ,scope ,args (do ,@body))
-        `(lit clo ,scope ,args ,body)))
+        `(lit clo ,scope ,args ,body))
 
 ;; (mac fn (args body)
 ;;      `(lit clo ,scope ,args (do ,@body)))
@@ -16,18 +15,22 @@
 (mac def (name args body)
     `(set ,name (fn ,args ,body)))
 
+
+;; (mac apply (fn args)
+;;      (if (> (len args) `(,fn (cons ,@args ())))
+;;          `(,fn ,@args)))
+
 (def add-one (a)
   (prn a)
   (fn () a))
 
 
-(def my-test () (prn 2010) (prn 2121))
-(prn (my-test))
 
-(def my-test2 () (prn 2021))
-(def my-test3 () 1)
+(def my-test () (do (prn 1010) (prn 2020)))
 
-(prn (my-test2))
-(prn (my-test3))
-;; (prn (my-test))
-;; (prn (if (> (len 1 ) 1) 10 20))
+(def my-test2 () (prn 3030))
+(def my-test3 () 4040)
+
+(my-test)
+(my-test2)
+(prn (id 4040 (my-test3)))
