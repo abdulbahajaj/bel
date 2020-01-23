@@ -90,15 +90,18 @@ func tokenize(in string) []token{
 
 	allPatterns := []tokenPattern{
 		tokenPattern{ name: "NEW_LINE",  pattern: `\n` },
+		tokenPattern{ name: "UNQUOTE",  pattern: `,` },
+		tokenPattern{ name: "UNWRAP",  pattern: `@` },
 		tokenPattern{ name: "BACKTICK",  pattern: `` + "`"},
 		tokenPattern{ name: "QUOTE",  pattern: `'` },
+		tokenPattern{ name: "DOUBLEQUOTE",  pattern: `"` },
 		tokenPattern{ name: "COMMENT",  pattern: `;`  },
 		tokenPattern{ name: "WHITE_SPACE",  pattern: ` `  },
 		tokenPattern{ name: "NUMBER",  pattern: `[+-]?([0-9]+(\.[0-9]*)?)`},
 		tokenPattern{ name: "OPEN_CIRCLE_BRACKET",   pattern: `\(` },
 		tokenPattern{ name: "CLOSE_CIRCLE_BRACKET",  pattern: `\)` },
 		tokenPattern{ name: "ESCAPED",  pattern: `(\\bel|\\.)` },
-		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z,0-9@><]*` },
+		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z0-9><&*!#$%^:?]*` },
 		tokenPattern{ name: "OTHER",  pattern: `.` },
 	}
 
@@ -170,16 +173,14 @@ func readQuote(allTokens []token) (types.BrutList, []token, error){
 	return this, allTokens, err
 }
 
+
 /*
 * Back tick
 */
 
 func putBTWrapper(el types.BrutType) types.BrutType {
-
-	if el.GetType() == types.SYMBOL{
-		if sym := el.(types.BrutSymbol); sym[0] == '@'{
-			return sym[1:]
-		}
+	if el.GetType() == types.UNWRAP{
+		return el.(types.BrutUnwrap).Val
 	}
 
 	wrapper := types.NewBrutList()
@@ -190,13 +191,13 @@ func putBTWrapper(el types.BrutType) types.BrutType {
 }
 
 func putBackTick(bType types.BrutType)(types.BrutType){
-	if common.IsAtom(bType){
-		// TODO Why quote every non symbol atom?
-		if bType.GetType() != types.SYMBOL {
-			return putQuote(bType)
-		} else if sym := bType.(types.BrutSymbol); sym[0] == ','{
-			return sym[1:]
-		}
+	if bType.GetType() == types.UNQUOTE {
+		return bType.(types.BrutUnquote).Val
+	} else if bType.GetType() == types.UNWRAP {
+		unwrap := bType.(types.BrutUnwrap)
+		unwrap.Val = putQuote(unwrap.Val)
+		return unwrap
+	} else if common.IsAtom(bType) {
 		return putQuote(bType)
 	} else {
 		list := bType.(types.BrutList)
@@ -208,7 +209,6 @@ func putBackTick(bType types.BrutType)(types.BrutType){
 			btEl := putBackTick(el)
 			wrappedBtEl := putBTWrapper(btEl)
 			exp = exp.Append(wrappedBtEl)
-
 		}
 		return exp
 	}
@@ -219,6 +219,21 @@ func readBackTick(allTokens []token)(types.BrutType, []token, error){
 	allTokens = remaining_tokens
 	return putBackTick(readStructure), allTokens, err
 }
+
+func readUnquote(allTokens []token)(types.BrutType, []token, error){
+	readStructure, remaining_tokens, err := readRec(allTokens)
+	readStructure = types.NewUnquote(readStructure)
+	allTokens = remaining_tokens
+	return readStructure, allTokens, err
+}
+
+func readUnwrap(allTokens []token)(types.BrutType, []token, error){
+	readStructure, remaining_tokens, err := readRec(allTokens)
+	readStructure = types.NewUnwrap(readStructure)
+	allTokens = remaining_tokens
+	return readStructure, allTokens, err
+}
+
 
 /*
 * Reader
@@ -265,13 +280,15 @@ func readNum(allTokens []token) (types.BrutNumber, []token, error){
 	return types.BrutNumber(i), allTokens, nil
 }
 
+// func readString(allTokens []token)(types.BrutType, []token, error){
+// }
+
 func readRec(allTokens []token)(types.BrutType, []token, error){
 	current_token, remaining_tokens, err := consume(allTokens)
 	allTokens = remaining_tokens
 	if err != nil {
 		return types.BrutList{}, []token{}, err
 	}
-	// allTokens = unConsume(current_token, remaining_tokens)
 
 	if current_token.name == "OPEN_CIRCLE_BRACKET" {
 		return readExp(allTokens)
@@ -292,7 +309,12 @@ func readRec(allTokens []token)(types.BrutType, []token, error){
 	} else if current_token.name == "QUOTE"{
 		return readQuote(allTokens)
 	} else if current_token.name == "BACKTICK"{
-		return readBackTick(allTokens)
+		res, t, e := readBackTick(allTokens)
+		return res, t, e
+	} else if current_token.name == "UNQUOTE"{
+		return readUnquote(allTokens)
+	} else if current_token.name == "UNWRAP"{
+		return readUnwrap(allTokens)
 	}
 	return types.BrutList{}, []token{}, errors.New(
 		"Unidentified expression: " + current_token.val + " " + current_token.name)

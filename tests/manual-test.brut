@@ -1,36 +1,37 @@
-(set mac
+(def mac
     (lit mac
         (lit clo scope (name args body)
-            `(set ,name
+            `(def ,name
                 (lit mac
                     (lit clo scope ,args ,body))))))
 
+(mac fn (args &body)
+        `(lit clo ,scope ,args (do ,@body)))
+        ;; (prn body))
 
-(mac fn (args body)
-        `(lit clo ,scope ,args ,body))
+(mac defn (name args &body)
+    `(def ,name (fn ,args ,@body)))
 
-;; (mac fn (args body)
-;;      `(lit clo ,scope ,args (do ,@body)))
+(mac apply (fn &args)
+     (if (> (len args) 1) `(,fn (cons ,@args)) `(,fn ,@args)))
 
-(mac def (name args body)
-    `(set ,name (fn ,args ,body)))
+(defn no? (arg) (id arg nil))
+
+(defn even? (num) (id (mod num 2) 0))
+
+(defn odd? (num) (no? (even? num)))
+
+(defn filter-index (test arr)
+  (filter (fn (ind) (if (test ind) (nth arr ind))) (range 0 (len arr))))
+
+     ;; `(fn ,(filter-index even? vals) ,@body))
+(mac let (vals &body)
+     `((fn ,(filter-index even? vals) ,@body) ,@(filter-index odd? vals)))
+     ;; `(fn ,(filter-index even? vals) ,@body))
+
+(let (x 44 y 333)
+  (prn x y))
 
 
-;; (mac apply (fn args)
-;;      (if (> (len args) `(,fn (cons ,@args ())))
-;;          `(,fn ,@args)))
 
-(def add-one (a)
-  (prn a)
-  (fn () a))
-
-
-
-(def my-test () (do (prn 1010) (prn 2020)))
-
-(def my-test2 () (prn 3030))
-(def my-test3 () 4040)
-
-(my-test)
-(my-test2)
-(prn (id 4040 (my-test3)))
+;; (prn "abcd")

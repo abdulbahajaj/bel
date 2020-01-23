@@ -1,35 +1,63 @@
 package eval
 
 import (
+	"fmt"
 	"github.com/abdulbahajaj/brutus/pkg/types"
 	"github.com/abdulbahajaj/brutus/pkg/common"
 )
 
-func notCallablePanic(name string){
-	panic("Not callable: " + name)
-}
 
-func unwrapParams(params types.BrutList, args types.BrutList, env *types.BrutEnv) *types.BrutEnv{
-	paramsLen := len(params)
-	argsLen := len(args)
+/*
+* Arg destructuring
+*/
 
-	for cursor := 0; cursor < paramsLen; cursor++ {
-		currentParam := params[cursor]
-		var currentArg types.BrutType
-		if cursor == paramsLen - 1 && argsLen > paramsLen {
-			currentArg = args[cursor:]
-		} else {
-			currentArg = args[cursor]
+func destructure(params types.BrutList, args types.BrutList, env *types.BrutEnv) *types.BrutEnv {
+	argsLen := len(args) - 1
+	paramsLen := len(params) - 1
+	if paramsLen == -1 {
+		return env
+	}
+
+	last := params[paramsLen]
+	if last.GetType() == types.SYMBOL {
+		if lastSym := last.(types.BrutSymbol); lastSym[0] == '&' {
+			var curArg types.BrutType
+			if argsLen < paramsLen {
+				curArg = types.NewBrutList()
+			} else {
+				curArg = args[paramsLen:]
+			}
+			env.SetParam(lastSym[1:], curArg)
+			paramsLen = paramsLen - 1
 		}
-		if common.IsAtom(currentParam) {
-			env.SetParam(currentParam.(types.BrutSymbol), currentArg)
-		} else if !common.IsAtom(currentParam) && !common.IsAtom(currentArg) {
-			env = unwrapParams(currentParam.(types.BrutList), currentArg.(types.BrutList), env)
+	}
+
+	if argsLen < paramsLen {
+		fmt.Println(params)
+		fmt.Println(args)
+		panic("Wrong Arity")
+	}
+
+	for cur := 0; cur <= paramsLen; cur++ {
+		curParam := params[cur]
+		curArg := args[cur]
+		if curParam.GetType() == types.SYMBOL {
+			env.SetParam(curParam.(types.BrutSymbol), curArg)
+		} else if curParam.GetType() == types.LIST {
+			env = destructure(curParam.(types.BrutList), curArg.(types.BrutList), env)
 		} else {
-			panic("args don't match params")
+			panic("Param can be either a symbol or a list of symbols")
 		}
 	}
 	return env
+}
+
+/*
+* Handle Callables
+*/
+
+func notCallablePanic(name string){
+	panic("Not callable: " + name)
 }
 
 func callClo(lit types.BrutList, args types.BrutList, env *types.BrutEnv, evalArgs bool) (types.BrutType, *types.BrutEnv) {
@@ -37,10 +65,6 @@ func callClo(lit types.BrutList, args types.BrutList, env *types.BrutEnv, evalAr
 	env = newEnv
 	params := lit[3].(types.BrutList)
 	body := lit[4]
-
-	// if len(params) != len(args){
-	// 	panic("Wrong arity")
-	// }
 
 	var cloEnv *types.BrutEnv
 	switch envDesc.GetType(){
@@ -51,12 +75,10 @@ func callClo(lit types.BrutList, args types.BrutList, env *types.BrutEnv, evalAr
 			cloEnv.SetParam(envDescL[cursor].(types.BrutSymbol), envDescL[cursor + 1] )
 		}
 		case types.ENV:
-		// envTemp :=
 		cloEnv = envDesc.(*types.BrutEnv).AddScope()
-
 	}
 
-	cloEnv = unwrapParams(params, args, cloEnv)
+	cloEnv = destructure(params, args, cloEnv)
 	returnVal, cloEnv := RecEval(body, cloEnv)
 
 	return returnVal, env
@@ -107,6 +129,7 @@ func invokeCallable(call types.BrutList, env *types.BrutEnv) (types.BrutType, *t
 		if clo.GetType() != types.LIST{
 			notCallablePanic(first.String())
 		}
+
 		args := call[1:]
 		expansion, env := callClo(clo.(types.BrutList), args, env, false)
 		return RecEval(expansion, env)
@@ -146,12 +169,12 @@ func evalIf(bList types.BrutList, env *types.BrutEnv) (types.BrutType, *types.Br
 	return types.BrutType(types.NewBrutList()), env
 }
 
-func evalSet(exp types.BrutList, env *types.BrutEnv) (types.BrutType, *types.BrutEnv){
+func evalDef(exp types.BrutList, env *types.BrutEnv) (types.BrutType, *types.BrutEnv){
 	for cursor := 1; cursor < len(exp); cursor += 2{
 		val, newEnv := RecEval(exp[cursor + 1], env)
 		env = newEnv
 
-		env.Set(exp[cursor].(types.BrutSymbol), val)
+		env.Def(exp[cursor].(types.BrutSymbol), val)
 	}
 	return types.BrutSymbol("t"), env
 }
@@ -189,7 +212,7 @@ func setMac(def types.BrutList, env *types.BrutEnv) (*types.BrutEnv){
 	mac = mac.Append(types.BrutSymbol("mac"))
 	mac = mac.Append(clo)
 
-	env.Set(name, mac)
+	env.Def(name, mac)
 
 // (mac nilwith (x)
 //   (list 'cons nil x))
@@ -221,8 +244,8 @@ func RecEval(bType types.BrutType, env *types.BrutEnv) (types.BrutType, *types.B
 			return bList, env
 		case "quote":
 			return bList[1], env
-		case "set":
-			return evalSet(bList, env)
+		case "def":
+			return evalDef(bList, env)
 		case "do":
 			res, newEnv := seqEval(bList[1:], env)
 			env = newEnv

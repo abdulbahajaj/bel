@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	// "strconv"
 )
 
 type ObjectType int
@@ -16,6 +15,8 @@ const (
 	MODULE
 	PRIMITIVE
 	ENV
+	UNWRAP
+	UNQUOTE
 )
 
 type BrutAny interface {}
@@ -87,6 +88,7 @@ func (bNumber BrutNumber) String() string{
 	return fmt.Sprintf("%v", float64(bNumber))
 }
 
+
 /*
 * Symbols
 */
@@ -101,29 +103,6 @@ func (bSym BrutSymbol) String() string{
 	return string(bSym)
 }
 
-
-/*
-* lambda
-*/
-
-// type BrutLambda struct{
-// 	params []BrutSymbol
-// 	body BrutList
-// }
-
-// func (BrutLambda) GetType() ObjectType{
-// 	return LAMBDA
-// }
-
-// func (bLambda BrutLambda) String() string{
-// 	result := ""
-// 	for _,current_param :=range bLambda.params {
-// 		result += current_param + " "
-// 	}
-// 	result += bLambda.String()
-
-// 	return result
-// }
 
 /*
 * BrutPrimitive
@@ -144,67 +123,8 @@ func (BrutPrimitive) String() string{
 * Environment
 */
 
-// type envScope map[BrutSymbol]BrutType
-// type BrutEnv struct{
-// 	stack []envScope
-// }
-
-// func NewBrutEnv() BrutEnv{
-// 	env := BrutEnv{stack: make([]envScope, 0)}
-// 	env.AddScope()
-// 	return env
-// }
-
-// func (e *BrutEnv) AddScope(){
-// 	e.stack = append(e.stack, make(envScope))
-// }
-
-// func (e *BrutEnv) SetScope(sym BrutSymbol, val BrutType){
-// 	last := len(e.stack) - 1
-// 	e.stack[last][sym] = val
-// }
-
-// func (e *BrutEnv) PopScope(){
-// 	e.stack = e.stack[:len(e.stack) - 1]
-// }
-
-// func (e *BrutEnv) Set(sym BrutSymbol, val BrutType){
-// 	e.stack[0][sym] = val
-// }
-
-// func (e BrutEnv) LookUp(sym BrutSymbol) BrutType{
-// 	for cursor := len(e.stack) - 1; cursor >= 0; cursor-- {
-// 		stack := e.stack[cursor]
-// 		if val, ok := stack[sym]; ok {
-// 			return val
-// 		}
-// 	}
-// 	panic("lookup failed" + sym.String())
-// }
-
-// func (BrutEnv) GetType()ObjectType{
-// 	return ENV
-// }
-
-// func (e BrutEnv)String()string{
-// 	result := ""
-// 	ind := ""
-// 	for _, scope := range e.stack{
-// 		result += ind + "-> new scope\n"
-// 		for sym, val := range scope{
-// 			result += ind + string(sym) + " : " + val.String() + "\n"
-// 		}
-// 		ind += "\t"
-// 	}
-// 	return result
-// }
-
-
-/*
-* Environment
-*/
-
 type scopeVals map[BrutSymbol]BrutType
+
 type BrutEnv struct {
 	isRoot bool
 	first *BrutEnv
@@ -234,18 +154,12 @@ func (bs *BrutEnv) AddScope() *BrutEnv{
 	return newScope
 }
 
-func (bs *BrutEnv) Set(sym BrutSymbol, val BrutType){
+func (bs *BrutEnv) Def(sym BrutSymbol, val BrutType){
 	bs.first.vals[sym] = val
-	if val.GetType() == ENV{
-		fmt.Println("SETTING ENV")
-	}
 }
 
 func (bs *BrutEnv) SetParam(sym BrutSymbol, val BrutType){
 	bs.vals[sym] = val
-	if val.GetType() == ENV{
-		fmt.Println("SETTING ENV")
-	}
 }
 
 func (bs *BrutEnv) LookUp(sym BrutSymbol) BrutType{
@@ -265,27 +179,6 @@ func (BrutEnv) GetType() ObjectType{
 	return ENV
 }
 
-func (bs *BrutEnv) Test(){
-	fmt.Println(bs.parent == bs.parent.first)
-	fmt.Println(bs.parent.vals)
-	// fmt.Println(bs.parent.parent.parent.isRoot)
-}
-
-// func (bs *BrutEnv) String() string {
-// 	result := ""
-// 	fmt.Println(bs.parent.vals)
-// 	// for sym, val := range bs.vals {
-// 	// 	result += fmt.Sprintf("%v : %v", sym, val)
-// 	// }
-// 	return result
-// }
-
-func (bs *BrutEnv) isFirst(){
-	if bs == bs.first {
-		fmt.Println("I am first")
-	}
-	fmt.Println("I am not first")
-}
 
 func (bs BrutEnv) String() string{
 	result := ""
@@ -309,4 +202,43 @@ func (bs BrutEnv) String() string{
 	result += "}\n"
 
 	return result
+}
+
+
+/*
+* Internal types
+*/
+
+// Unwrap
+type BrutUnwrap struct {
+	Val BrutType
+}
+
+func NewUnwrap(val BrutType) BrutUnwrap{
+	return BrutUnwrap{Val: val}
+}
+
+func (b BrutUnwrap) String() string{
+	return b.Val.String()
+}
+
+func (b BrutUnwrap) GetType() ObjectType{
+	return UNWRAP
+}
+
+// Unquote
+type BrutUnquote struct {
+	Val BrutType
+}
+
+func NewUnquote(val BrutType) BrutUnquote{
+	return BrutUnquote{Val: val}
+}
+
+func (b BrutUnquote) String() string{
+	return b.Val.String()
+}
+
+func (b BrutUnquote) GetType() ObjectType{
+	return UNQUOTE
 }

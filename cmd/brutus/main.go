@@ -21,9 +21,6 @@ func main() {
     panic(err)
   }
   program := string(dat)
-  // fmt.Println(string(program[3]) == "\n")
-  // fmt.Println("Program:")
-  // fmt.Println(program)
 
   module, err := reader.Read(program)
   if err != nil{
@@ -33,13 +30,6 @@ func main() {
     }
   }
 
-  // fmt.Println(">Parsed:")
-  // reader.PrintModule(module)
-
-
-  // fmt.Println(">Started eval: ")
   env := primitives.GetPrimitiveEnv()
   eval.Eval(module, env)
-  // fmt.Println(">Result: ")
-  // fmt.Println(return_stack)
 }

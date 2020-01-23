@@ -24,7 +24,8 @@ func id(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 			return types.NewBrutList(), env
 		}
 		if el.GetType() == types.LIST {
-			if &el != &first {
+			if len(el.(types.BrutList)) == 0 && len(el.(types.BrutList)) == 0 {
+			} else if &el != &first {
 				return types.NewBrutList(), env
 			}
 		} else if el != first {
@@ -39,7 +40,7 @@ func prn(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 		fmt.Print(el.String() + " ")
 	}
 	fmt.Print("\n")
-	return l, env
+	return types.BrutNumber(1), env
 }
 
 func evaluate(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
@@ -75,16 +76,6 @@ func cons(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv
 	}
 
 	return result, env
-}
-
-func setPrimitive(name string, env *types.BrutEnv, fn func(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv)){
-	lit := types.NewBrutList()
-	lit = lit.Append(types.BrutSymbol("lit"))
-	lit = lit.Append(types.BrutSymbol("prim"))
-	lit = lit.Append(types.BrutSymbol(name))
-	lit = lit.Append(types.BrutPrimitive(fn))
-
-	env.Set(types.BrutSymbol(name), lit)
 }
 
 func bmap(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
@@ -136,16 +127,78 @@ func second(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv
 
 func nth(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	li := l[0].(types.BrutList)
-	index := li[1].(types.BrutNumber)
+	index := l[1].(types.BrutNumber)
 	return  li[int(index)], env
+}
+
+func mod(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	return types.BrutNumber(int(l[0].(types.BrutNumber)) % int(l[1].(types.BrutNumber))), env
+}
+
+func filter(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	f := l[0]
+	toIterateOver := l[1].(types.BrutList)
+	results := types.NewBrutList()
+	for _, el := range toIterateOver{
+		call := types.NewBrutList()
+		call = call.Append(f)
+		call = call.Append(el)
+		callRes, newEnv := eval.RecEval(call, env)
+		env = newEnv
+		if callRes.GetType() == types.LIST {
+			if len(callRes.(types.BrutList)) == 0 {
+				continue
+			}
+		}
+		results = results.Append(callRes)
+	}
+	return results, env
+}
+
+func bRange(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	results := types.NewBrutList()
+	start := int(l[0].(types.BrutNumber))
+	end := int(l[1].(types.BrutNumber))
+
+	for cur := start; cur < end; cur++{
+		results = results.Append(types.BrutNumber(cur))
+	}
+
+	return results, env
+
+}
+func index(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	results := types.NewBrutList()
+	for key, val := range results{
+		pair := types.NewBrutList()
+		pair = pair.Append(types.BrutNumber(key))
+		pair = pair.Append(val)
+		results.Append(pair)
+	}
+	return results, env
+}
+
+func setPrimitive(name string, env *types.BrutEnv, fn func(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv)){
+	lit := types.NewBrutList()
+	lit = lit.Append(types.BrutSymbol("lit"))
+	lit = lit.Append(types.BrutSymbol("prim"))
+	lit = lit.Append(types.BrutSymbol(name))
+	lit = lit.Append(types.BrutPrimitive(fn))
+
+	env.Def(types.BrutSymbol(name), lit)
 }
 
 func GetPrimitiveEnv() *types.BrutEnv{
 	env := types.NewBrutEnv()
 	env.MakeGlobal()
 
+
+	setPrimitive("nth", env, nth)
+	setPrimitive("range", env, bRange)
+	setPrimitive("filter", env, filter)
 	setPrimitive(">", env, biggerThan)
 	setPrimitive("<", env, smallerThan)
+	setPrimitive("mod", env, mod)
 	setPrimitive("len", env, length)
 	setPrimitive("+", env, sum)
 	setPrimitive("prn", env, prn)

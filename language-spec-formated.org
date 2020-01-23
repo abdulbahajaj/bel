@@ -144,8 +144,6 @@ tried to avoid gratuitous departures from existing Lisp conventions.
 Which means if you see a departure from existing conventions, there
 is probably a reason for it.
 
-
-
 * Data
 
 Bel has four fundamental data types: symbols, pairs, characters, and
@@ -316,7 +314,6 @@ and the empty list, but in practice it works well. Lisp functions
 often return sets of answers, and the empty set of answers is
 falsity.
 
-
 * Functions
 
 Bel programs consist mostly of functions. Functions take zero or more
@@ -353,7 +350,6 @@ representation. Usually you'd say
 #+END_SRC
 
 which yields the function above.
-
 
 * Evaluation
 
@@ -453,7 +449,6 @@ like the term "expression," this is just a statement of intention.
 You can put anything first in an expression so long as you specify
 what happens when you do.
 
-
 * Bindings and Environments
 
 There are three ways a variable can have a value. It can have a value
@@ -485,7 +480,6 @@ of bindings, you'll modify whichever binding is currently visible. If
 you do an assignment to a variable that's not bound, you'll create a
 global binding for it.
 
-
 * Errors
 
 Errors are signalled by calling err with one argument describing the
@@ -493,7 +487,6 @@ error. Bel doesn't specify a global binding for err; this is
 something for a programming environment built on top of Bel to do.
 But some error-catching code in the Bel source does dynamically bind
 err.
-
 
 * Axioms
 
@@ -510,7 +503,6 @@ In the following sections, the descriptions of primitives are their
 definitions. The descriptions of special forms, however, are merely
 summaries of their behavior; special forms are defined by the code
 that implements them in the Bel source.
-
 
 * Variables and Constants
 
@@ -537,7 +529,6 @@ The default input and output streams. Initially nil, which represents
 the initial input and output streams. Bel doesn't specify what those
 are, but if you started Bel at a prompt you'd expect them to be the
 terminal.
-
 
 * Quote
 
@@ -576,7 +567,6 @@ a
 
 Because the symbols nil, t, o, and apply evaluate to themselves, you
 don't have to quote them. Ditto for strings.
-
 
 * Primitives
 
@@ -806,7 +796,6 @@ Returns either t or nil randomly.
 
 Sends x as a command to the operating system.
 
-
 * Special Forms
 
 Expressions beginning with special forms are not always evaluated in
@@ -975,7 +964,6 @@ expression or in code called by it).
 Starts a new thread in which x will be evaluated. Global bindings are
 shared between threads, but not dynamic ones.
 
-
 * Functions, special forms and macros
 
 Starting with the foregoing 25 operators, we're going to define more,
@@ -1024,7 +1012,6 @@ treat it as an abbreviation for
 The actual def and mac operators are more powerful, but this is as
 much as we need to start with.
 
-
 ** Function abbreviation
 Treat an expression in square brackets, e.g.
 
@@ -1040,7 +1027,6 @@ as an abbreviation for
 
 In Bel, underscore is an ordinary character and _ is thus an ordinary
 variable.
-
 
 ** back quote
 Finally, treat an expression with a prepended backquote (`) as a
@@ -1072,7 +1058,6 @@ list:
 (a b c d e f)
 #+END_SRC
 
-
 ** No
 Now let's look at the source. The first expression defines a function
 no that takes one argument, x, and returns the result of using id to
@@ -1090,7 +1075,6 @@ nil
 
 Since nil represents both falsity and the empty list, no is both
 logical negation and the test for the empty list.
-
 
 ** Atom
 The second function, atom, returns true iff its argument is not a
@@ -1112,7 +1096,6 @@ t
 > (atom '(a))
 nil
 #+END_SRC
-
 
 ** All and some
 Next come a pair of similar functions, all and some. The former
@@ -1163,7 +1146,6 @@ the definition of all might be:
 This technique of doing something to the car of a list and then
 perhaps continuing down the cdr is very common.
 
-
 ** Error
 Something else is new in all and some: these are the first functions
 in the Bel source that you could cause an error by calling.
@@ -1198,7 +1180,6 @@ already exist in Bel you could define it as simply
 
 But since we haven't defined functional composition yet, I didn't use
 it.
-
 
 ** Reduce
 The next function, reduce, is for combining the elements of its
@@ -1263,7 +1244,6 @@ or if an if is long,
      else)
 #+END_SRC
 
-
 ** Cons
 The next function, cons, has the name that join had in McCarthy's
 Lisp. It's the function you use to put things on the front of a list.
@@ -1306,7 +1286,6 @@ the value of args will be
 #+BEGIN_SRC common-lisp
 (a b (c d))
 #+END_SRC
-
 
 ** List parameter
 The parameter list of a Bel function can be a tree of any shape. If
@@ -1369,7 +1348,6 @@ called
 
 you'll get an error because there is no parameter for c.
 
-
 ** Append
 The next function, append, joins lists together:
 
@@ -1408,7 +1386,6 @@ becomes
 
 and so on. The definition of append in the Bel source is the same
 principle applied to any number of arguments.
-
 
 ** Apply
 In it we see the first use of apply. Like if, apply is a special
@@ -1463,7 +1440,6 @@ first argument and the remaining arguments. Unlike append2, append
 has to make this call using apply, because it has a varying number of
 arguments in a list, instead of exactly two.
 
-
 ** Snoc and list
 Once we have append it's easy to define snoc, which as its name
 suggests is like a reverse cons,
@@ -1509,7 +1485,6 @@ then the value that list returned would be the same list as x-- not
 merely a list with the same elements, but the same pair-- meaning if
 we modified the value we got from list, we'd also be modifying the
 object up in the calling code.
-
 
 ** Map
 After list we see map, which in the simplest case returns a list of
@@ -1581,7 +1556,6 @@ usual "do this to the rest of the list" recursive call in the last
 line. But in the preceding line we also use (map car ls) to collect
 the arguments for f. And that's why we need the single-list base
 case. Without it, we'd get an infinite recursion.
-
 
 ** Macros
 Next comes our first macro, fn. There are two concepts to explain
@@ -1658,7 +1632,6 @@ but as
 (mac nilwith (x)
   `(cons nil ,x))
 #+END_SRC
-
 
 ** Functions
 Now let's work our way up to fn, starting with the following
@@ -1814,7 +1787,6 @@ Then the expansion wraps a do around the expressions.
 We haven't seen do yet, but it's coming soon. It makes multiple
 expressions into a block of code.
 
-
 ** Vmark
 Next comes something unusual: vmark is set to a newly created pair
 made by join. Missing arguments to primitives default to nil, so
@@ -1827,7 +1799,6 @@ next function, uvar, thus returns a new, unique variable each time
 it's called. The reason we need such a thing is so that when we're
 manipulating user code, we can add variables without worrying they'll
 accidentally share the names of variables created by users.
-
 
 ** Do
 Now we see the definition of do, which we used in the expansion of
@@ -1921,7 +1892,6 @@ a
 a
 #+END_SRC
 
-
 ** The definition of def
 Next we see the definition of def itself, which does nothing more
 than set its first argument to a fn made using the rest of the
@@ -1937,7 +1907,6 @@ reduce, which is defined using def, which expands into a fn. So to
 avoid an infinite recursion we either have to define reduce as a
 literal function, or make either fn or do consider the single
 expression case, and making fn do it was the least ugly.
-
 
 ** OR
 Now that we have let, we can define or, which returns the first
@@ -2004,7 +1973,6 @@ nil
 a
 #+END_SRC
 
-
 ** And
 The and macro is similar in spirit to or, but different in its
 implementation. Whereas or uses recursion to generate its expansion,
@@ -2032,7 +2000,6 @@ The other interesting thing about and is what we do when it has no
 arguments. While we want (or) to return nil, we want (and) to return
 t. So in the second argument to reduce, we replace an empty args with
 (t).
-
 
 ** Equality
 The next function, =, is the one that programs usually use to test
@@ -2085,7 +2052,6 @@ for this test even though all could use id. My rule is to use =
 unless I specifically need id. That way the appearance of id is a
 signal that code is looking for identical structure.
 
-
 ** Proper
 Then we see proper, which tells us whether something is a proper
 list. Informally, a proper list is one that we don't need a dot to
@@ -2115,7 +2081,6 @@ special notation: zero or more characters within double quotes.
 > (string "foo")
 t
 #+END_SRC
-
 
 ** mem
 The next function, mem, tests for list membership.
@@ -2171,18 +2136,15 @@ behaviors out of mem.
 (4 6 8)
 #+END_SRC
 
-
 ** in
 The next function, in, is effectively a generalization of =. It
 returns true iff its first argument is = to any of the rest.
-
 
 ** Data access
 Then come three common combinations of car and cdr: cadr, which gets
 the second element of a list, cddr, which takes two elements off the
 front, and caddr, which gets the third element. We'll have other ways
 to do these things once we've defined numbers.
-
 
 ** Case macro
 The case macro takes an initial expression e, followed by
@@ -2208,7 +2170,6 @@ returns the name of a sign represented by a symbol:
 > (sname '+)
 plus
 #+END_SRC
-
 
 ** iflet macro
 The iflet macro lets you use the result of a test in an if. It works
@@ -2246,7 +2207,6 @@ first element of a list that matches some test.
 "apple"
 #+END_SRC
 
-
 ** begin function
 The begins function returns true iff its first argument is a list
 that begins with its second argument:
@@ -2258,7 +2218,6 @@ t
 
 Like mem, it takes an optional comparison function that defaults
 to =.
-
 
 ** Caris
 It's used in caris, which returns true iff its first argument is a
@@ -2273,7 +2232,6 @@ t
 This is one of those functions you end up using surprisingly often,
 because it's so common for the car of a list to have some special
 significance.
-
 
 ** Hug
 Our next function, hug, applies a function to pairs of elements of a
@@ -2314,7 +2272,6 @@ values of later ones.
 a
 #+END_SRC
 
-
 ** Keep and Rem
 The next function, keep, returns all the elements of a list that pass
 some test
@@ -2339,7 +2296,6 @@ argument.
 > (rem 4 '(5 3 1 2 4) >=)
 (3 1 2)
 #+END_SRC
-
 
 ** Get and put
 The next two functions, get and put, are for operating on key-value
@@ -2379,7 +2335,6 @@ nil and having no value.
 Notice that put doesn't change the value of x, just as consing
 something onto x wouldn't change the value of it.
 
-
 ** Rev snap, udrop, idfn,
 The function rev reverses a list,
 
@@ -2415,7 +2370,6 @@ Then we get the identity function, idfn:
 You wouldn't call this directly (why bother?) but you often end up
 using it as a default or when operating on functions.
 
-
 ** is
 The function is is a little unusual in that it returns a function for
 comparing its argument to something.
@@ -2428,7 +2382,6 @@ t
 An is is a partially applied =, so in principle we won't need it
 after we define partial application later on. But this case is so
 common that it's convenient to have a separate operator for it.
-
 
 ** Dynamic binding
 Now come several macros for dealing with errors. The first, eif,
@@ -2464,7 +2417,6 @@ because a lexical binding created by let (or more precisely by a
 function call) is only visible within its body. And whereas lexical
 bindings get saved in closures (as in e.g. is), dynamic bindings,
 like global ones, don't.
-
 
 ** Continuations
 Another concept we're seeing for the first time is that of a
@@ -2560,7 +2512,6 @@ expression within something like
 
 except of course you'd want to use a uvar instead of c.
 
-
 ** eif and safe
 Now let's look at eif. It's like if except that which of its
 arguments get evaluated depends not on whether its test expression
@@ -2623,7 +2574,6 @@ a
 nil
 #+END_SRC
 
-
 ** The literal, variable, and isa function
 The next function, literal, returns true iff its argument evaluates
 to itself,
@@ -2649,8 +2599,6 @@ does
 > ((isa 'clo) map)
 t
 #+END_SRC
-
-
 
 * Eval
 The operators we've defined so far, together with the axioms, will
@@ -3484,7 +3432,6 @@ into
 There's a good deal more of the language still to come, including
 numbers and I/O, but we have now seen the entire Bel interpreter.
 
-
 * functions that operate on functions
 Next come several functions for operating on functions. The first,
 function, tells whether something is a function and if so what kind.
@@ -4180,7 +4127,6 @@ case to be made for treating functions as black boxes, but with
 macros you often want to acknowledge what a macro expands into and
 pass through its optional arguments if you can.
 
-
 * Reader
 Now we have all the operators we need to write the Bel reader. This
 is like an inverted pyramid built upon the rdb primitive, which reads
@@ -4519,9 +4465,7 @@ symbol.
 
 That's the end of the reader.
 
-
 * More functions and macros
-
 ** Back quote macro
  Next comes the definition of the bquote
 macro. This is not part of the reader per se; the syns for \` and \,
@@ -4734,7 +4678,6 @@ matching backquotes.
 Error: comma-outside-backquote
 #+END_SRC
 
-
 ** Printer
 Now we come to the printer. The print function takes an object and
 an optional stream and prints the object to the stream. There are
@@ -4856,7 +4799,6 @@ I'm sorry, Dave. I'm afraid I can't do that.
 
 It calls prnice to print its arguments in a readable form.
 
-
 ** Drop function
 The drop function takes n elements off the front of a list
 
@@ -4864,7 +4806,6 @@ The drop function takes n elements off the front of a list
 > (drop 2 '(a b c d e))
 (c d e)
 #+END_SRC
-
 
 ** Accessing array elements
 and nth returns the nth element of one.
@@ -4912,7 +4853,6 @@ be returned as the value of the catch expression.
 a
 #+END_SRC
 
-
 ** Cut
 The cut function returns the elements of a list from its second
 argument to its third inclusive,
@@ -4942,7 +4882,6 @@ to successive elements of a list.
        x)
 (c b a)
 #+END_SRC
-
 
 ** Function on function
 Now come several functions on functions. The first, flip, takes a
@@ -5024,7 +4963,6 @@ The mod function returns its first argument modulo its second,
 > (mod 17 3)
 2
 #+END_SRC
-
 
 ** Iteration
 Then come a group of macros for iteration. The first, whilet,
@@ -5153,7 +5091,6 @@ argument. It and randlen are used to build the general rand function,
 which takes a positive integer n and returns a random integer between
 0 and n-1 inclusive.
 
-
 ** Assignment macros
 Next come a group of macros for assignment, starting with wipe, which
 sets multiple things to nil.
@@ -5237,7 +5174,6 @@ instances of duplicate elements.
 "abrcd"
 #+END_SRC
 
-
 ** Sorting function
 Next come a group of functions involving sorting. The first inserts
 an element into a (presumably sorted) list according to a comparison
@@ -5309,7 +5245,6 @@ integers in case of ties.
 > (map round '(-2.5 -1.5 -1.4 1.4 1.5 2.5))
 (-2 -2 -1 1 2 2)
 #+END_SRC
-
 
 ** Functions to operate on files
 Next come a group of functions for operating on files. The first is a
@@ -5393,7 +5328,6 @@ The function prs uses it to print its arguments to a string.
 "what he said"
 #+END_SRC
 
-
 ** Functions to operate on arrays
 Then come functions for operating on arrays. Bel arrays are
 recursively defined in the sense that an n dimensional array is a
@@ -5447,7 +5381,6 @@ Including references to subarrays:
 (lit arr (lit arr 0 0 0) (lit arr 5 0 0))
 #+END_SRC
 
-
 ** Functions to operate on key-value stores
 Next come a set of functions for operating on tables, which are
 key-value stores.
@@ -5498,7 +5431,6 @@ Finally, tabrem removes all entries with certain keys from a table.
 > k
 (lit tab (a . 1) (c . d))
 #+END_SRC
-
 
 ** Objects with names fields
 The last code in the Bel source is for defining objects with named
