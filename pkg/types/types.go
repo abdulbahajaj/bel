@@ -10,13 +10,12 @@ const (
 	LIST
 	NUMBER
 	CHARACHTER
-	LITERAL
 	SYMBOL
-	MODULE
 	PRIMITIVE
 	ENV
 	UNWRAP
 	UNQUOTE
+	TABLE
 )
 
 type BrutAny interface {}
@@ -67,11 +66,26 @@ func (bList BrutList) String() string {
 
 /*
 * Tables
-* TODO Implement
 */
 
 type BrutTable map[BrutType]BrutType
 
+func NewBrutTable() BrutTable{
+	return make(BrutTable)
+}
+
+
+func (BrutTable) GetType() ObjectType {
+	return TABLE
+}
+
+func (bt BrutTable) String() string {
+	result := ""
+	for key, val := range bt {
+		result += key.String() + " : " + val.String() + "\n"
+	}
+	return result
+}
 
 
 /*

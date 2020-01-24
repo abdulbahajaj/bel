@@ -280,7 +280,6 @@ func readNum(allTokens []token) (types.BrutNumber, []token, error){
 	return types.BrutNumber(i), allTokens, nil
 }
 
-
 func readString(allTokens []token)(types.BrutType, []token, error){
 	result := ""
 

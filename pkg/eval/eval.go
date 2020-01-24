@@ -124,6 +124,10 @@ func invokeCallable(call types.BrutList, env *types.BrutEnv) (types.BrutType, *t
 		env = newEnv
 		return function(args, env)
 
+		case "tab":
+		table := lit[2].(types.BrutTable)
+		key := call[1]
+		return table[key], env
 		case "mac":
 		clo := lit[2]
 		if clo.GetType() != types.LIST{

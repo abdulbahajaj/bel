@@ -167,6 +167,7 @@ func bRange(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv
 	return results, env
 
 }
+
 func index(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
 	results := types.NewBrutList()
 	for key, val := range results{
@@ -176,6 +177,23 @@ func index(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv)
 		results.Append(pair)
 	}
 	return results, env
+}
+
+func table(l types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv){
+	tb := types.NewBrutTable()
+	if len(l) % 2 != 0{
+		panic("Key, value pairs in tables must be even")
+	}
+	for cur := 0; cur < len(l); cur += 2{
+		tb[l[cur]] = l[cur + 1]
+	}
+
+	lit := types.NewBrutList()
+	lit = lit.Append(types.BrutSymbol("lit"))
+	lit = lit.Append(types.BrutSymbol("tab"))
+	lit = lit.Append(tb)
+
+	return lit, env
 }
 
 func setPrimitive(name string, env *types.BrutEnv, fn func(exp types.BrutList, env *types.BrutEnv)(types.BrutType, *types.BrutEnv)){
@@ -194,6 +212,7 @@ func GetPrimitiveEnv() *types.BrutEnv{
 
 
 	setPrimitive("nth", env, nth)
+	setPrimitive("table", env, table)
 	setPrimitive("range", env, bRange)
 	setPrimitive("filter", env, filter)
 	setPrimitive(">", env, biggerThan)
