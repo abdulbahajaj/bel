@@ -90,6 +90,21 @@ func (bNumber BrutNumber) String() string{
 
 
 /*
+* Strings
+*/
+
+type BrutString string
+
+func (BrutString) GetType() ObjectType{
+	return STRING
+}
+
+func (s BrutString) String() string {
+	return string(s)
+}
+
+
+/*
 * Symbols
 */
 

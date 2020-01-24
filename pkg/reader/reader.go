@@ -94,13 +94,13 @@ func tokenize(in string) []token{
 		tokenPattern{ name: "UNWRAP",  pattern: `@` },
 		tokenPattern{ name: "BACKTICK",  pattern: `` + "`"},
 		tokenPattern{ name: "QUOTE",  pattern: `'` },
+		tokenPattern{ name: "ESCAPED",  pattern: `(\\bel|\\.)` },
 		tokenPattern{ name: "DOUBLEQUOTE",  pattern: `"` },
 		tokenPattern{ name: "COMMENT",  pattern: `;`  },
 		tokenPattern{ name: "WHITE_SPACE",  pattern: ` `  },
 		tokenPattern{ name: "NUMBER",  pattern: `[+-]?([0-9]+(\.[0-9]*)?)`},
 		tokenPattern{ name: "OPEN_CIRCLE_BRACKET",   pattern: `\(` },
 		tokenPattern{ name: "CLOSE_CIRCLE_BRACKET",  pattern: `\)` },
-		tokenPattern{ name: "ESCAPED",  pattern: `(\\bel|\\.)` },
 		tokenPattern{ name: "SYMBOL",  pattern: `[-+a-zA-Z0-9><&*!#$%^:?]*` },
 		tokenPattern{ name: "OTHER",  pattern: `.` },
 	}
@@ -280,8 +280,32 @@ func readNum(allTokens []token) (types.BrutNumber, []token, error){
 	return types.BrutNumber(i), allTokens, nil
 }
 
-// func readString(allTokens []token)(types.BrutType, []token, error){
-// }
+
+func readString(allTokens []token)(types.BrutType, []token, error){
+	result := ""
+
+	for {
+		t, remainingTokens, err := consume(allTokens)
+		allTokens = remainingTokens
+		if err != nil {
+			if err.Error() == "EmptyTokenList"{
+				panic("Unmatched string double quote")
+			}
+		}
+		if t.name == "ESCAPED" {
+			t.val = t.val[1:]
+		}
+
+		if t.name == "DOUBLEQUOTE"{
+			break
+		}
+		result += t.val;
+	}
+
+
+	return types.BrutString(result), allTokens, nil
+
+}
 
 func readRec(allTokens []token)(types.BrutType, []token, error){
 	current_token, remaining_tokens, err := consume(allTokens)
@@ -315,6 +339,8 @@ func readRec(allTokens []token)(types.BrutType, []token, error){
 		return readUnquote(allTokens)
 	} else if current_token.name == "UNWRAP"{
 		return readUnwrap(allTokens)
+	} else if current_token.name == "DOUBLEQUOTE"{
+		return readString(allTokens)
 	}
 	return types.BrutList{}, []token{}, errors.New(
 		"Unidentified expression: " + current_token.val + " " + current_token.name)
