@@ -2,6 +2,6 @@
 Brutus is a lisp Meta-circular evaluator.
 
 
-# Installation
+# Build
 
 make build
