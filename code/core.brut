@@ -1,0 +1,34 @@
+(def mac
+  (lit mac
+       (lit clo scope (name args body)
+            `(def ,name
+               (lit mac
+                    (lit clo scope ,args ,body))))))
+
+(mac fn (args &body)
+        `(lit clo ,scope ,args (do ,@body)))
+
+(mac defn (name args &body)
+    `(def ,name (fn ,args ,@body)))
+
+(mac apply (fn &args)
+     (if (> (len args) 1) `(,fn (cons ,@args)) `(,fn ,@args)))
+
+(defn no? (arg) (id arg nil))
+
+(defn even? (num) (id (mod num 2) 0))
+
+(defn odd? (num) (no? (even? num)))
+
+(defn filter-index (test arr)
+  (filter (fn (ind) (if (test ind) (nth arr ind))) (range 0 (len arr))))
+
+(mac let (vals &body)
+     `((fn ,(filter-index even? vals) ,@body) ,@(filter-index odd? vals)))
+
+(let (x 44 y 333)
+  (prn x y))
+
+(prn "testing \"" "123")
+
+(prn ((table 1 2 3 4) 1))

@@ -4,7 +4,7 @@ build:
 
 .PHONY: run
 run:
-	go run cmd/brutus/main.go tests/manual-test.brut
+	go run cmd/brutus/main.go code/core.brut
 
 .PHONY: test
 test:
